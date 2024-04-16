@@ -1,6 +1,6 @@
 package clofi.codeython.member.domain.request;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import clofi.codeython.member.domain.Member;
 import jakarta.validation.constraints.NotBlank;
@@ -32,7 +32,7 @@ public class CreateMemberRequest {
 		this.password = password;
 	}
 
-	public Member toMember(BCryptPasswordEncoder encoder) {
+	public Member toMember(PasswordEncoder encoder) {
 		return new Member(
 			username,
 			encoder.encode(password),
