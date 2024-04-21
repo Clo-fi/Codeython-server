@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu AS build
 FROM node
 
-ENV JAVA_HOME /usr/local/openjdk-21
+ENV JAVA_HOME /usr/lib/jvm/msopenjdk-21-amd64
 ENV PATH $JAVA_HOME/bin:$PATH
 
 WORKDIR /home/gradle/project
