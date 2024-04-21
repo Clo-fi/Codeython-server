@@ -5,9 +5,9 @@ COPY . .
 RUN mkdir -p /root/.gradle && \
     echo -e "systemProp.http.proxyHost=krmp-proxy.9rum.cc\nsystemProp.http.proxyPort=3128\nsystemProp.https.proxyHost=krmp-proxy.9rum.cc\nsystemProp.https.proxyPort=3128" > /root/.gradle/gradle.properties
 
-RUN apt update && \
-    apt install -y openjdk-21-jdk && \
-    apt clean
+RUN apt-get update
+RUN apt-get install -y openjdk-21-jdk
+RUN apt-get clean
 
 RUN chmod +x ./gradlew && \
     ./gradlew clean build
