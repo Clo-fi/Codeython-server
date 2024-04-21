@@ -183,7 +183,7 @@ class JudgeServiceTest {
         List<ExecutionResponse> actual = judgeService.execution(executionRequest, 1L);
 
         // then
-        assertThat(actual).containsExactly(new ExecutionResponse(false, "Test message\n[2,4,6]"));
+        assertThat(actual).containsExactly(new ExecutionResponse(false, String.format("Test message%n[2,4,6]")));
     }
 
     @DisplayName("코드 실행 중 Exception이 발생하면 오류가 발생한다.")
