@@ -20,6 +20,9 @@ public class Room {
     @JoinColumn(name = "problem_no", nullable = false)
     private Problem problem;
 
+    @Column(name = "room_name", nullable = false)
+    private String roomName;
+
     @Column(name = "password", length = 4)
     private String password;
 
