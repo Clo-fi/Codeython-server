@@ -1,0 +1,161 @@
+package clofi.codeython.room.service;
+
+import clofi.codeython.problem.domain.Problem;
+import clofi.codeython.problem.repository.ProblemRepository;
+import clofi.codeython.problem.service.ProblemService;
+import clofi.codeython.room.controller.response.CreateRoomResponse;
+import clofi.codeython.room.domain.request.CreateRoomRequest;
+import clofi.codeython.room.repository.RoomRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+@SpringBootTest
+class RoomServiceTest {
+
+    @Autowired
+    private ProblemService problemService;
+    @Autowired
+    private ProblemRepository problemRepository;
+    @Autowired
+    private RoomService roomService;
+    @Autowired
+    private RoomRepository roomRepository;
+
+
+    @AfterEach
+    void afterEach(){
+        roomRepository.deleteAllInBatch();
+        problemRepository.deleteAllInBatch();
+    }
+
+    @DisplayName("경기장 생성")
+    @Test
+    void createRoomTest(){
+        //given
+        Problem problem = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        Problem saveProblem = problemRepository.save(problem);
+
+        //when
+        CreateRoomRequest createRoomRequest = new CreateRoomRequest(
+                "경기장",
+                saveProblem.getProblemNo(),
+                4,
+                true,
+                "0000",
+                true
+        );
+        CreateRoomResponse room = roomService.createRoom(createRoomRequest);
+
+        //then
+        Assertions.assertThat(room.password()).isEqualTo("0000");
+    }
+
+    @DisplayName("비밀번호가 숫자가 아닐경우 예외 발생")
+    @Test
+    void createRoomExceptionTest(){
+        //given
+        Problem problem = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        problemRepository.save(problem);
+
+        //when
+        CreateRoomRequest createRoomRequest = new CreateRoomRequest(
+                "경기장",
+                1L,
+                4,
+                true,
+                "비밀번호",
+                true
+        );
+
+        //then
+        assertThatThrownBy(() ->
+                roomService.createRoom(createRoomRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("비밀번호는 숫자여야 합니다.");
+    }
+
+    @DisplayName("비밀번호가 4자리가 아닐경우 예외 발생")
+    @Test
+    void createRoomPasswordExceptionTest(){
+        //given
+        Problem problem = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        problemRepository.save(problem);
+
+        //when
+        CreateRoomRequest createRoomRequest = new CreateRoomRequest(
+                "경기장",
+                1L,
+                4,
+                true,
+                "00000",
+                true
+        );
+
+        //then
+        assertThatThrownBy(() ->
+                roomService.createRoom(createRoomRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("비밀번호는 4자리여야 합니다.");
+    }
+
+    @DisplayName("인원 제한 수가 2,4,6이 아닐 경우 예외")
+    @Test
+    void createRoomLimitMemberCntExceptionTest(){
+        //given
+        Problem problem = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        problemRepository.save(problem);
+
+        //when
+        CreateRoomRequest createRoomRequest = new CreateRoomRequest(
+                "경기장",
+                1L,
+                5,
+                true,
+                "0000",
+                true
+        );
+
+        //then
+        assertThatThrownBy(() ->
+                roomService.createRoom(createRoomRequest))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
+    }
+
+}
