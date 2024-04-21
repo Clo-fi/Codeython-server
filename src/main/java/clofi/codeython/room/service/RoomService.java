@@ -2,15 +2,20 @@ package clofi.codeython.room.service;
 
 import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.repository.ProblemRepository;
+import clofi.codeython.room.controller.response.AllRoomResponse;
 import clofi.codeython.room.controller.response.CreateRoomResponse;
 import clofi.codeython.room.domain.Room;
+import clofi.codeython.room.domain.RoomMember;
 import clofi.codeython.room.domain.request.CreateRoomRequest;
+import clofi.codeython.room.repository.RoomMemberRepository;
 import clofi.codeython.room.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +24,7 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
     private final ProblemRepository problemRepository;
+    private final RoomMemberRepository roomMemberRepository;
 
     public CreateRoomResponse createRoom(CreateRoomRequest createRoomRequest) {
         if (roomRepository.existsByRoomName(createRoomRequest.getRoomName())){
@@ -35,8 +41,10 @@ public class RoomService {
             throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
         }
 
-        if (createRoomRequest.getLimitMemberCnt() == 2 || createRoomRequest.getLimitMemberCnt() == 4
-        || createRoomRequest.getLimitMemberCnt() == 6){
+        if (!(createRoomRequest.getLimitMemberCnt() == 2 || createRoomRequest.getLimitMemberCnt() == 4
+                || createRoomRequest.getLimitMemberCnt() == 6)){
+            throw new IllegalArgumentException("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
+        }
             Problem problem = problemRepository.findByProblemNo(createRoomRequest.getProblemId());
 
             UUID uuid = UUID.randomUUID();
@@ -45,8 +53,17 @@ public class RoomService {
             Room room = roomRepository.save(createRoomRequest.toRoom(problem,inviteCode));
 
             return CreateRoomResponse.of(room);
-        } else {
-            throw new IllegalArgumentException("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
-        }
+    }
+
+    public List<AllRoomResponse> getAllRoom() {
+        List<Room> rooms = roomRepository.findAll();
+
+        return rooms.stream()
+                .map(room -> {
+                    List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+                    int playMemberCount = roomMembers.size();
+                    return AllRoomResponse.of(room, playMemberCount);
+                })
+                .collect(Collectors.toList());
     }
 }

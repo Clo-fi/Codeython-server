@@ -3,6 +3,7 @@ package clofi.codeython.room.service;
 import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.repository.ProblemRepository;
 import clofi.codeython.problem.service.ProblemService;
+import clofi.codeython.room.controller.response.AllRoomResponse;
 import clofi.codeython.room.controller.response.CreateRoomResponse;
 import clofi.codeython.room.domain.request.CreateRoomRequest;
 import clofi.codeython.room.repository.RoomRepository;
@@ -20,8 +21,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest
 class RoomServiceTest {
 
-    @Autowired
-    private ProblemService problemService;
     @Autowired
     private ProblemRepository problemRepository;
     @Autowired
@@ -156,6 +155,58 @@ class RoomServiceTest {
                 roomService.createRoom(createRoomRequest))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
+    }
+
+    @DisplayName("경기장 리스트 조회")
+    @Test
+    void getAllRoomsTest(){
+        //given
+        Problem problem1 = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        Problem problem2 = new Problem(
+                "where is koreanCow",
+                "koreanCow is delicious",
+                List.of("Never eat dog"),
+                60,
+                1,
+                List.of("String[][]", "int", "String")
+        );
+        Problem saveProblem1 = problemRepository.save(problem1);
+        Problem saveProblem2 = problemRepository.save(problem2);
+
+        CreateRoomRequest createRoomRequest1 = new CreateRoomRequest(
+                "경기장1",
+                saveProblem1.getProblemNo(),
+                4,
+                true,
+                "0000",
+                true
+        );
+        CreateRoomRequest createRoomRequest2 = new CreateRoomRequest(
+                "경기장2",
+                saveProblem2.getProblemNo(),
+                4,
+                true,
+                "0000",
+                true
+        );
+
+
+        //when
+        roomService.createRoom(createRoomRequest1);
+        roomService.createRoom(createRoomRequest2);
+
+        List<AllRoomResponse> allRoom = roomService.getAllRoom();
+
+        //then
+        Assertions.assertThat(allRoom.size()).isEqualTo(2);
+
     }
 
 }
