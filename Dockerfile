@@ -1,4 +1,5 @@
 FROM gradle:latest AS build
+FROM node:latest
 WORKDIR /home/gradle/project
 COPY . .
 RUN mkdir -p /root/.gradle && \
