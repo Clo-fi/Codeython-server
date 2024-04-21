@@ -12,11 +12,9 @@ RUN apt-get update && \
 RUN chmod +x ./gradlew && \
     ./gradlew clean build
 
-COPY ./libs /home/gradle/project/libs
-
 FROM openjdk:21-slim AS final
 WORKDIR /app
-COPY --from=build /home/gradle/project/libs /home/gradle/libs
+COPY --from=build /home/gradle/project/libs /home/gradle/project/libs
 COPY --from=build /home/gradle/project/build/libs/codeython-0.0.1-SNAPSHOT.jar app.jar
 COPY src/main/resources/application-prod.yaml resources/application-prod.yaml
 CMD ["java", "-jar", "app.jar", "--spring.config.location=resources/application-prod.yaml"]
