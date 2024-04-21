@@ -1,5 +1,10 @@
 FROM mcr.microsoft.com/openjdk/jdk:21-ubuntu AS build
 FROM node
+
+ARG JAVA_HOME
+ENV JAVA_HOME $JAVA_HOME
+ENV PATH="$JAVA_HOME/bin:${PATH}"
+
 WORKDIR /home/gradle/project
 COPY . .
 RUN mkdir -p /root/.gradle && \
