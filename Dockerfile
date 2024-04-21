@@ -1,8 +1,5 @@
-FROM amazoncorretto:21-alpine AS build
+FROM amazoncorretto:21 AS build
 FROM node
-
-ENV JAVA_HOME /usr/lib/jvm/default-jvm
-ENV PATH $JAVA_HOME/bin:$PATH
 
 WORKDIR /home/gradle/project
 COPY . .
