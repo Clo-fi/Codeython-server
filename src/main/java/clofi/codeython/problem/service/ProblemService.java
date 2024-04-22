@@ -61,16 +61,22 @@ public class ProblemService {
 
     }
 
-    public GetProblemResponse getProblem(Long problemNo) {
+    public GetProblemResponse getProblem(Long problemNo, Member member) {
 
         if (problemRepository.findByProblemNo(problemNo) == null){
             throw new EntityNotFoundException("등록된 문제가 없습니다.");
         }
         Problem problem = problemRepository.findByProblemNo(problemNo);
 
+        List<Record> records = recordRepository.findAllByProblemAndMemberOrderByCreatedAtDesc(problem, member);
         List<BaseCodeResponse> baseCodes = languageRepository.findByProblem(problem)
                 .stream()
-                .map(bc -> new BaseCodeResponse(bc.getLanguage(),bc.getBaseCode()))
+                .map(bc -> {
+                    Optional<Record> record = records.stream().filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
+                            .findAny();
+                    return record.map(r -> new BaseCodeResponse(bc.getLanguage(), r.getWrittenCode()))
+                            .orElseGet(() -> new BaseCodeResponse(bc.getLanguage(), bc.getBaseCode()));
+                })
                 .collect(Collectors.toList());
 
         List<TestcaseResponse> testcases = testcaseRepository.findByProblem(problem)

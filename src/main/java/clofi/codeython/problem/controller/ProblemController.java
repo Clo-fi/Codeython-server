@@ -36,8 +36,9 @@ public class ProblemController {
 	}
 
 	@GetMapping("/api/problems/{problemId}")
-	public ResponseEntity<GetProblemResponse> getProblem(@PathVariable("problemId") Long problemNo) {
-		return ResponseEntity.ok(problemService.getProblem(problemNo));
+	public ResponseEntity<GetProblemResponse> getProblem(@PathVariable("problemId") Long problemNo,
+														 @AuthenticationPrincipal CustomMemberDetails userDetails) {
+		return ResponseEntity.ok(problemService.getProblem(problemNo, userDetails.getMember()));
 	}
 
 

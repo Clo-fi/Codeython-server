@@ -3,6 +3,7 @@ package clofi.codeython.problem.service;
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.problem.controller.response.AllProblemResponse;
+import clofi.codeython.problem.controller.response.BaseCodeResponse;
 import clofi.codeython.problem.controller.response.GetProblemResponse;
 import clofi.codeython.problem.controller.response.RecordResponse;
 import clofi.codeython.problem.domain.Record;
@@ -10,6 +11,7 @@ import clofi.codeython.problem.domain.*;
 import clofi.codeython.problem.domain.request.BaseCodeRequest;
 import clofi.codeython.problem.domain.request.CreateProblemRequest;
 import clofi.codeython.problem.domain.request.TestcaseRequest;
+import clofi.codeython.problem.judge.dto.SubmitRequest;
 import clofi.codeython.problem.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
@@ -244,6 +246,7 @@ class ProblemServiceTest {
     @Test
     void getProblemTest(){
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         List<BaseCodeRequest> baseCodeRequests1 = new ArrayList<>();
         baseCodeRequests1.add(new BaseCodeRequest(
                 LanguageType.JAVA,
@@ -265,7 +268,7 @@ class ProblemServiceTest {
         Long problemId = problemService.createProblem(createProblemRequest);
 
         //when
-        GetProblemResponse problem = problemService.getProblem(problemId);
+        GetProblemResponse problem = problemService.getProblem(problemId, member);
 
         //then
         Assertions.assertThat("where is koreanCow").isEqualTo(problem.title());
@@ -327,4 +330,29 @@ class ProblemServiceTest {
 
 	}
 
+    @DisplayName("문제 상세 조회 시 가장 최근에 제출한 코드가 베이스 코드에 표시된다.")
+    @Test
+    void baseCodeTest() {
+        // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
+        languageRepository.save(new Language(problem, LanguageType.JAVASCRIPT, "base code..."));
+
+        recordRepository.save(new Record("code1", member, problem, "JAVA", 100, null, null));
+        recordRepository.save(new Record("code2", member, problem, "JAVA", 80, null, null));
+
+        // when
+        GetProblemResponse response = problemService.getProblem(problem.getProblemNo(), member);
+        List<BaseCodeResponse> baseCodeResponses = response.baseCode();
+        // then
+        assertThat(baseCodeResponses).containsAll(List.of(
+                new BaseCodeResponse(LanguageType.JAVA, "code2"),
+                new BaseCodeResponse(LanguageType.JAVASCRIPT, "base code...")
+        ));
+    }
 }

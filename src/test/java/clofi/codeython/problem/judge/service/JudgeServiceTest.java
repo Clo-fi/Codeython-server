@@ -324,7 +324,7 @@ class JudgeServiceTest {
 
         // when
         judgeService.submit(submitRequest, problem.getProblemNo(), member);
-        List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
+        List<Record> records = recordRepository.findAllByProblemAndMemberOrderByCreatedAtDesc(problem, member);
 
         // then
         assertThat(records).hasSize(1);
