@@ -1,5 +1,6 @@
 package clofi.codeython.problem.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class ProblemService {
         return problem.getProblemNo();
     }
 
-    public List<AllProblemResponse> getAllProblem() {
+    public List<AllProblemResponse> getAllProblem(Member member) {
         List<Problem> problems = problemRepository.findAll();
 
         if (problems.isEmpty()){
@@ -53,9 +54,9 @@ public class ProblemService {
         }
 
         return problems.stream().map(problem -> {
-            Optional<Record> record = recordRepository.findByProblem(problem);
-            return record.map(value -> AllProblemResponse
-                            .of(problem, value.getAccuracy(), true))
+            List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
+            Optional<Record> highestAccuracy = records.stream().max(Comparator.comparingInt(Record::getAccuracy));
+            return highestAccuracy.map(record -> AllProblemResponse.of(problem, record.getAccuracy(), true))
                     .orElseGet(() -> AllProblemResponse.of(problem, 0, false));
         }).collect(Collectors.toList());
 

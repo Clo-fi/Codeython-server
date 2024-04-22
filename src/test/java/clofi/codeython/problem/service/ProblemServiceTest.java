@@ -11,7 +11,6 @@ import clofi.codeython.problem.domain.*;
 import clofi.codeython.problem.domain.request.BaseCodeRequest;
 import clofi.codeython.problem.domain.request.CreateProblemRequest;
 import clofi.codeython.problem.domain.request.TestcaseRequest;
-import clofi.codeython.problem.judge.dto.SubmitRequest;
 import clofi.codeython.problem.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.Assertions;
@@ -173,6 +172,7 @@ class ProblemServiceTest {
     @Test
     void getAllProblemTest(){
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         List<BaseCodeRequest> baseCodeRequests1 = new ArrayList<>();
         baseCodeRequests1.add(new BaseCodeRequest(
                 LanguageType.JAVA,
@@ -194,7 +194,7 @@ class ProblemServiceTest {
         Long problemId = problemService.createProblem(createProblemRequest);
 
         //when
-        List<AllProblemResponse> allProblem = problemService.getAllProblem();
+        List<AllProblemResponse> allProblem = problemService.getAllProblem(member);
 
         //then
         AllProblemResponse problem = allProblem.get(0);
@@ -223,7 +223,7 @@ class ProblemServiceTest {
         Long problemId2 = problemService.createProblem(createProblemRequest2);
 
         //when
-        List<AllProblemResponse> allProblem2 = problemService.getAllProblem();
+        List<AllProblemResponse> allProblem2 = problemService.getAllProblem(member);
 
         //then
         Assertions.assertThat(2).isEqualTo(allProblem2.size());
@@ -234,10 +234,11 @@ class ProblemServiceTest {
     @Test
     void getAllProblemWithNotTest() {
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         //when
         //then
         assertThatThrownBy(() ->
-                problemService.getAllProblem())
+                problemService.getAllProblem(member))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("등록된 문제가 없습니다.");
     }
@@ -353,6 +354,40 @@ class ProblemServiceTest {
         assertThat(baseCodeResponses).containsAll(List.of(
                 new BaseCodeResponse(LanguageType.JAVA, "code2"),
                 new BaseCodeResponse(LanguageType.JAVASCRIPT, "base code...")
+        ));
+    }
+
+    @DisplayName("문제 목록 조회 시 플레이 여부와 가장 높은 정확도가 표시된다.")
+    @Test
+    void isPlayedAndAccuracyTest() {
+        // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem1 = problemRepository.save(new Problem(
+                "문제 1번", "content", List.of("제한 사항"), 10, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem1, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem1, LanguageType.JAVA, "base code..."));
+        languageRepository.save(new Language(problem1, LanguageType.JAVASCRIPT, "base code..."));
+
+        Problem problem2 = problemRepository.save(new Problem(
+                "문제 2번", "content", List.of("제한 사항"), 10, 2, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem1, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem1, LanguageType.JAVA, "base code..."));
+
+        recordRepository.save(new Record("code1", member, problem1, "JAVA", 60, null, null));
+        recordRepository.save(new Record("code2", member, problem1, "JAVA", 100, null, null));
+        recordRepository.save(new Record("code3", member, problem1, "JAVA", 80, null, null));
+
+        // when
+        List<AllProblemResponse> allProblem = problemService.getAllProblem(member);
+
+        // then
+        assertThat(allProblem).containsAll(List.of(
+                new AllProblemResponse(problem1.getProblemNo(), "문제 1번", 1, 100, true),
+                new AllProblemResponse(problem2.getProblemNo(), "문제 2번", 2, 0, false)
         ));
     }
 }

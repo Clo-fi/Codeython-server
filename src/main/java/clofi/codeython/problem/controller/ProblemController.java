@@ -30,9 +30,9 @@ public class ProblemController {
 	}
 
 	@GetMapping("/api/problems")
-	public ResponseEntity<List<AllProblemResponse>> getAllProblem() {
+	public ResponseEntity<List<AllProblemResponse>> getAllProblem(@AuthenticationPrincipal CustomMemberDetails userDetails) {
 
-		return ResponseEntity.ok(problemService.getAllProblem());
+		return ResponseEntity.ok(problemService.getAllProblem(userDetails.getMember()));
 	}
 
 	@GetMapping("/api/problems/{problemId}")
