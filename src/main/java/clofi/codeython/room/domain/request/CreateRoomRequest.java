@@ -21,7 +21,6 @@ public class CreateRoomRequest {
     private Long problemId;
 
     @NotNull(message = "인원 제한 수는 공백일 수 없습니다.")
-    @Pattern(regexp = "^([246])$", message = "인원 제한 수는 2, 4, 6 중 하나여야 합니다.")
     private int limitMemberCnt;
 
     private boolean isSecret;
