@@ -64,21 +64,11 @@ public class RoomService {
         if (room == null) {
             throw new IllegalArgumentException("방이 존재하지 않습니다");
         }
+        List<RoomMember> roomMember = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
+        if (roomMember.size() >= room.getLimitMemberCnt()) {
+            throw new IllegalArgumentException("방이 꽉 찼습니다");
+        }
         return processRoomJoin(room, member, false);
-    }
-
-    private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
-        Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
-        RoomMember roomMember = new RoomMember(room, member, isOwner);
-        roomMemberRepository.save(roomMember);
-        notifyRoomParticipants(room, member);
-
-        return RoomResponse.of(room, problem);
-    }
-
-    private void notifyRoomParticipants(Room room, Member member) {
-        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), member.getExp());
-        messagingTemplate.convertAndSend("/topic/rooms/" + room.getRoomNo(), socketUserResponse);
     }
 
     public CreateRoomResponse createRoom(CreateRoomRequest createRoomRequest) {
@@ -120,5 +110,19 @@ public class RoomService {
                 return AllRoomResponse.of(room, playMemberCount);
             })
             .collect(Collectors.toList());
+    }
+
+    private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
+        Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
+        RoomMember roomMember = new RoomMember(room, member, isOwner);
+        roomMemberRepository.save(roomMember);
+        notifyRoomParticipants(room, member);
+
+        return RoomResponse.of(room, problem);
+    }
+
+    private void notifyRoomParticipants(Room room, Member member) {
+        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), member.getExp());
+        messagingTemplate.convertAndSend("/topic/rooms/" + room.getRoomNo(), socketUserResponse);
     }
 }
