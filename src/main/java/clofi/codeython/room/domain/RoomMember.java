@@ -24,4 +24,10 @@ public class RoomMember {
 
     @Column(name = "is_owner")
     private boolean isOwner;
+
+    public RoomMember(Room room, Member user, boolean isOwner) {
+        this.room = room;
+        this.user = user;
+        this.isOwner = isOwner;
+    }
 }
