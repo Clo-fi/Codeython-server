@@ -3,6 +3,7 @@ package clofi.codeython.problem.service;
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.problem.controller.response.AllProblemResponse;
+import clofi.codeython.problem.controller.response.BaseCodeResponse;
 import clofi.codeython.problem.controller.response.GetProblemResponse;
 import clofi.codeython.problem.controller.response.RecordResponse;
 import clofi.codeython.problem.domain.Record;
@@ -171,6 +172,7 @@ class ProblemServiceTest {
     @Test
     void getAllProblemTest(){
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         List<BaseCodeRequest> baseCodeRequests1 = new ArrayList<>();
         baseCodeRequests1.add(new BaseCodeRequest(
                 LanguageType.JAVA,
@@ -192,7 +194,7 @@ class ProblemServiceTest {
         Long problemId = problemService.createProblem(createProblemRequest);
 
         //when
-        List<AllProblemResponse> allProblem = problemService.getAllProblem();
+        List<AllProblemResponse> allProblem = problemService.getAllProblem(member);
 
         //then
         AllProblemResponse problem = allProblem.get(0);
@@ -221,7 +223,7 @@ class ProblemServiceTest {
         Long problemId2 = problemService.createProblem(createProblemRequest2);
 
         //when
-        List<AllProblemResponse> allProblem2 = problemService.getAllProblem();
+        List<AllProblemResponse> allProblem2 = problemService.getAllProblem(member);
 
         //then
         Assertions.assertThat(2).isEqualTo(allProblem2.size());
@@ -232,10 +234,11 @@ class ProblemServiceTest {
     @Test
     void getAllProblemWithNotTest() {
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         //when
         //then
         assertThatThrownBy(() ->
-                problemService.getAllProblem())
+                problemService.getAllProblem(member))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("등록된 문제가 없습니다.");
     }
@@ -244,6 +247,7 @@ class ProblemServiceTest {
     @Test
     void getProblemTest(){
         //given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
         List<BaseCodeRequest> baseCodeRequests1 = new ArrayList<>();
         baseCodeRequests1.add(new BaseCodeRequest(
                 LanguageType.JAVA,
@@ -265,7 +269,7 @@ class ProblemServiceTest {
         Long problemId = problemService.createProblem(createProblemRequest);
 
         //when
-        GetProblemResponse problem = problemService.getProblem(problemId);
+        GetProblemResponse problem = problemService.getProblem(problemId, member);
 
         //then
         Assertions.assertThat("where is koreanCow").isEqualTo(problem.title());
@@ -327,4 +331,63 @@ class ProblemServiceTest {
 
 	}
 
+    @DisplayName("문제 상세 조회 시 가장 최근에 제출한 코드가 베이스 코드에 표시된다.")
+    @Test
+    void baseCodeTest() {
+        // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
+        languageRepository.save(new Language(problem, LanguageType.JAVASCRIPT, "base code..."));
+
+        recordRepository.save(new Record("code1", member, problem, "JAVA", 100, null, null));
+        recordRepository.save(new Record("code2", member, problem, "JAVA", 80, null, null));
+
+        // when
+        GetProblemResponse response = problemService.getProblem(problem.getProblemNo(), member);
+        List<BaseCodeResponse> baseCodeResponses = response.baseCode();
+        // then
+        assertThat(baseCodeResponses).containsAll(List.of(
+                new BaseCodeResponse(LanguageType.JAVA, "code2"),
+                new BaseCodeResponse(LanguageType.JAVASCRIPT, "base code...")
+        ));
+    }
+
+    @DisplayName("문제 목록 조회 시 플레이 여부와 가장 높은 정확도가 표시된다.")
+    @Test
+    void isPlayedAndAccuracyTest() {
+        // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem1 = problemRepository.save(new Problem(
+                "문제 1번", "content", List.of("제한 사항"), 10, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem1, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem1, LanguageType.JAVA, "base code..."));
+        languageRepository.save(new Language(problem1, LanguageType.JAVASCRIPT, "base code..."));
+
+        Problem problem2 = problemRepository.save(new Problem(
+                "문제 2번", "content", List.of("제한 사항"), 10, 2, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem1, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem1, LanguageType.JAVA, "base code..."));
+
+        recordRepository.save(new Record("code1", member, problem1, "JAVA", 60, null, null));
+        recordRepository.save(new Record("code2", member, problem1, "JAVA", 100, null, null));
+        recordRepository.save(new Record("code3", member, problem1, "JAVA", 80, null, null));
+
+        // when
+        List<AllProblemResponse> allProblem = problemService.getAllProblem(member);
+
+        // then
+        assertThat(allProblem).containsAll(List.of(
+                new AllProblemResponse(problem1.getProblemNo(), "문제 1번", 1, 100, true),
+                new AllProblemResponse(problem2.getProblemNo(), "문제 2번", 2, 0, false)
+        ));
+    }
 }

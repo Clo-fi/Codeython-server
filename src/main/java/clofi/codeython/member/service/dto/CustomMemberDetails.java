@@ -2,11 +2,13 @@ package clofi.codeython.member.service.dto;
 
 import java.util.Collection;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import clofi.codeython.member.domain.Member;
 
+@Getter
 public class CustomMemberDetails implements UserDetails {
 	private final Member member;
 

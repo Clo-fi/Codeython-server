@@ -1,5 +1,6 @@
 package clofi.codeython.problem.service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class ProblemService {
         return problem.getProblemNo();
     }
 
-    public List<AllProblemResponse> getAllProblem() {
+    public List<AllProblemResponse> getAllProblem(Member member) {
         List<Problem> problems = problemRepository.findAll();
 
         if (problems.isEmpty()){
@@ -53,24 +54,30 @@ public class ProblemService {
         }
 
         return problems.stream().map(problem -> {
-            Optional<Record> record = recordRepository.findByProblem(problem);
-            return record.map(value -> AllProblemResponse
-                            .of(problem, value.getAccuracy(), true))
+            List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
+            Optional<Record> highestAccuracy = records.stream().max(Comparator.comparingInt(Record::getAccuracy));
+            return highestAccuracy.map(record -> AllProblemResponse.of(problem, record.getAccuracy(), true))
                     .orElseGet(() -> AllProblemResponse.of(problem, 0, false));
         }).collect(Collectors.toList());
 
     }
 
-    public GetProblemResponse getProblem(Long problemNo) {
+    public GetProblemResponse getProblem(Long problemNo, Member member) {
 
         if (problemRepository.findByProblemNo(problemNo) == null){
             throw new EntityNotFoundException("등록된 문제가 없습니다.");
         }
         Problem problem = problemRepository.findByProblemNo(problemNo);
 
+        List<Record> records = recordRepository.findAllByProblemAndMemberOrderByCreatedAtDesc(problem, member);
         List<BaseCodeResponse> baseCodes = languageRepository.findByProblem(problem)
                 .stream()
-                .map(bc -> new BaseCodeResponse(bc.getLanguage(),bc.getBaseCode()))
+                .map(bc -> {
+                    Optional<Record> record = records.stream().filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
+                            .findAny();
+                    return record.map(r -> new BaseCodeResponse(bc.getLanguage(), r.getWrittenCode()))
+                            .orElseGet(() -> new BaseCodeResponse(bc.getLanguage(), bc.getBaseCode()));
+                })
                 .collect(Collectors.toList());
 
         List<TestcaseResponse> testcases = testcaseRepository.findByProblem(problem)
