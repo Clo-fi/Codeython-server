@@ -14,4 +14,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 	Optional<Record> findByProblem(Problem problem);
 
 	List<Record> findAllByMemberOrderByUpdatedAtDesc(Member member);
+
+	List<Record> findAllByProblemAndMember(Problem problem, Member member);
 }

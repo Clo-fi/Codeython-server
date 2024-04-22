@@ -1,5 +1,7 @@
 package clofi.codeython.problem.judge.service;
 
+import clofi.codeython.member.domain.Member;
+import clofi.codeython.problem.domain.Record;
 import clofi.codeython.problem.judge.domain.ResultCalculator;
 import clofi.codeython.problem.judge.domain.creator.ExecutionFileCreator;
 import clofi.codeython.problem.judge.dto.ExecutionRequest;
@@ -8,7 +10,9 @@ import clofi.codeython.problem.judge.dto.SubmitRequest;
 import clofi.codeython.problem.domain.LanguageType;
 import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.domain.Testcase;
+import clofi.codeython.problem.judge.dto.SubmitResponse;
 import clofi.codeython.problem.repository.ProblemRepository;
+import clofi.codeython.problem.repository.RecordRepository;
 import clofi.codeython.problem.repository.TestcaseRepository;
 import java.io.File;
 import java.io.IOException;
@@ -32,8 +36,10 @@ public class JudgeService {
     private final ResultCalculator resultCalculator;
     private final ProblemRepository problemRepository;
     private final TestcaseRepository testcaseRepository;
+    private final RecordRepository recordRepository;
 
-    public int submit(SubmitRequest submitRequest, Long problemNo) {
+    @Transactional
+    public SubmitResponse submit(SubmitRequest submitRequest, Long problemNo, Member member) {
         Problem problem = problemRepository.findById(problemNo)
                 .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
 
@@ -47,7 +53,14 @@ public class JudgeService {
 
             List<Testcase> testcases = testcaseRepository.findAllByProblemProblemNo(problemNo);
 
-            return resultCalculator.judge(route, submitRequest.language(), testcases);
+            int accuracy = resultCalculator.judge(route, submitRequest.language(), testcases);
+            if (submitRequest.roomId() == null) {
+                recordRepository.save(
+                        new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
+                                accuracy, null, null));
+
+            }
+            return new SubmitResponse(accuracy, null, null);
         } finally {
             cleanup(route);
         }

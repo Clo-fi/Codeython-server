@@ -1,53 +1,70 @@
 package clofi.codeython.problem.judge.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 
+import clofi.codeython.member.domain.Member;
+import clofi.codeython.member.repository.MemberRepository;
+import clofi.codeython.problem.domain.Language;
+import clofi.codeython.problem.domain.LanguageType;
 import clofi.codeython.problem.domain.Problem;
+import clofi.codeython.problem.domain.Record;
 import clofi.codeython.problem.domain.Testcase;
 import clofi.codeython.problem.judge.dto.ExecutionRequest;
 import clofi.codeython.problem.judge.dto.ExecutionResponse;
 import clofi.codeython.problem.judge.dto.SubmitRequest;
+import clofi.codeython.problem.judge.dto.SubmitResponse;
+import clofi.codeython.problem.repository.LanguageRepository;
 import clofi.codeython.problem.repository.ProblemRepository;
+import clofi.codeython.problem.repository.RecordRepository;
 import clofi.codeython.problem.repository.TestcaseRepository;
 import java.util.List;
-import java.util.Optional;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
 class JudgeServiceTest {
     @Autowired
     JudgeService judgeService;
 
-    @MockBean
+    @Autowired
     ProblemRepository problemRepository;
 
-    @MockBean
+    @Autowired
     TestcaseRepository testcaseRepository;
 
-    @BeforeEach
-    void setUp() {
-        given(problemRepository.findById(Mockito.anyLong())).willReturn(Optional.of(new Problem(
-                "title", "content", null, 1, 1, List.of("int", "int[]")
-        )));
-        given(testcaseRepository.findAllByProblemProblemNo(Mockito.any())).willReturn(List.of(
-                new Testcase(null,
-                        List.of("3", "[1, 2, 3]"),
-                        "[2,4,6]", "description")
-        ));
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
+    RecordRepository recordRepository;
+
+    @Autowired
+    LanguageRepository languageRepository;
+
+    @AfterEach
+    void tearDown() {
+        recordRepository.deleteAllInBatch();
+        memberRepository.deleteAllInBatch();
+        languageRepository.deleteAllInBatch();
+        testcaseRepository.deleteAllInBatch();
+        problemRepository.deleteAllInBatch();
     }
 
     @DisplayName("자바 코드로 채점을 진행할 수 있다.")
     @Test
     void javaCodeSubmitTest() {
         // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -61,16 +78,23 @@ class JudgeServiceTest {
                 """, null);
 
         // when
-        int actual = judgeService.submit(submitRequest, 1L);
+        SubmitResponse response = judgeService.submit(submitRequest, problem.getProblemNo(), member);
 
         // then
-        assertThat(actual).isEqualTo(100);
+        assertThat(response.accuracy()).isEqualTo(100);
     }
 
     @DisplayName("자바스크립트 코드로 채점을 진행할 수 있다.")
     @Test
     void javascriptCodeSubmitTest() {
         // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("javascript", """
                 function solution(N, values) {
                   return values.map(v => v * 2)
@@ -78,16 +102,23 @@ class JudgeServiceTest {
                 """, null);
 
         // when
-        int actual = judgeService.submit(submitRequest, 1L);
+        SubmitResponse response = judgeService.submit(submitRequest, problem.getProblemNo(), member);
 
         // then
-        assertThat(actual).isEqualTo(100);
+        assertThat(response.accuracy()).isEqualTo(100);
     }
 
     @DisplayName("지원하지 않는 언어를 제출하면 오류가 발생한다.")
     @Test
     void invalidLanguageSubmitTest() {
         // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("go", """
                 function solution(N, values) {
                   return values.map(v => v * 2)
@@ -96,7 +127,7 @@ class JudgeServiceTest {
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.submit(submitRequest, 1L))
+                .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member))
                 .withMessage("GO(은)는 지원하지 않는 언어 종류입니다.");
     }
 
@@ -104,6 +135,13 @@ class JudgeServiceTest {
     @Test
     void exceptionCodeSubmitTest() {
         // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -119,13 +157,19 @@ class JudgeServiceTest {
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.submit(submitRequest, 1L));
+                .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member));
     }
 
     @DisplayName("자바 코드 실행결과 및 정답 여부를 확인할 수 있다.")
     @Test
     void javaCodeExecutionTest() {
         // given
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -139,7 +183,7 @@ class JudgeServiceTest {
                 """);
 
         // when
-        List<ExecutionResponse> actual = judgeService.execution(executionRequest, 1L);
+        List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
 
         // then
         assertThat(actual).containsExactly(new ExecutionResponse(true, "[2,4,6]"));
@@ -149,6 +193,12 @@ class JudgeServiceTest {
     @Test
     void javascriptCodeExecutionTest() {
         // given
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("javascript", """
                 function solution(N, values) {
                   return values.map(v => v * 2)
@@ -156,7 +206,7 @@ class JudgeServiceTest {
                 """);
 
         // when
-        List<ExecutionResponse> actual = judgeService.execution(executionRequest, 1L);
+        List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
 
         // then
         assertThat(actual).containsExactly(new ExecutionResponse(true, "[2,4,6]"));
@@ -166,6 +216,12 @@ class JudgeServiceTest {
     @Test
     void incorrectOutputCodeTest() {
         // given
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -180,7 +236,7 @@ class JudgeServiceTest {
                 """);
 
         // when
-        List<ExecutionResponse> actual = judgeService.execution(executionRequest, 1L);
+        List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
 
         // then
         assertThat(actual).containsExactly(new ExecutionResponse(false, String.format("Test message%n[2,4,6]")));
@@ -190,6 +246,12 @@ class JudgeServiceTest {
     @Test
     void exceptionCodeExecutionTest() {
         // given
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -205,18 +267,19 @@ class JudgeServiceTest {
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.execution(executionRequest, 1L));
+                .isThrownBy(() -> judgeService.execution(executionRequest, problem.getProblemNo()));
     }
 
     @DisplayName("description이 없는 테스트 케이스는 실행하지 않는다.")
     @Test
     void emptyDescriptionTestcaseTest() {
-        given(testcaseRepository.findAllByProblemProblemNo(Mockito.any())).willReturn(List.of(
-                new Testcase(null,
-                        List.of("3", "[1, 2, 3]"),
-                        "[2,4,6]", null)
-        ));
         // given
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", null));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
                 class Solution {
                     public int[] solution(int N, int[] values) {
@@ -230,9 +293,40 @@ class JudgeServiceTest {
                 """);
 
         // when
-        List<ExecutionResponse> execution = judgeService.execution(executionRequest, 1L);
+        List<ExecutionResponse> execution = judgeService.execution(executionRequest, problem.getProblemNo());
 
         // then
         assertThat(execution).isEmpty();
+    }
+
+    @DisplayName("혼자놀기 제출 시 채점 기록이 저장된다.")
+    @Test
+    void recordTest() {
+        // given
+        Member member = memberRepository.save(new Member("username", "password", "nickname"));
+        Problem problem = problemRepository.save(new Problem(
+                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+        ));
+        testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
+                "[2,4,6]", "description"));
+        languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
+        SubmitRequest submitRequest = new SubmitRequest("java", """
+                class Solution {
+                    public int[] solution(int N, int[] values) {
+                        int[] answer = new int[values.length];
+                        for (int i = 0; i < N; i++) {
+                            answer[i] = values[i] * 2;
+                        }
+                        return answer;
+                    }
+                }
+                """, null);
+
+        // when
+        judgeService.submit(submitRequest, problem.getProblemNo(), member);
+        List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
+
+        // then
+        assertThat(records).hasSize(1);
     }
 }

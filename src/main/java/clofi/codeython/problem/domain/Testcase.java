@@ -26,7 +26,7 @@ public class Testcase {
     @Column(name = "output", nullable = false, columnDefinition = "TEXT")
     private String output;
 
-    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     public Testcase(Problem problem, List<String> input, String output, String description) {
