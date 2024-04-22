@@ -86,6 +86,7 @@ public class RoomService {
     private void notifyRoomParticipants(Room room, Member member) {
         SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), member.getExp());
         messagingTemplate.convertAndSend("/topic/rooms/" + room.getRoomNo(), socketUserResponse);
+    }
 
     public CreateRoomResponse createRoom(CreateRoomRequest createRoomRequest) {
         if (roomRepository.existsByRoomName(createRoomRequest.getRoomName())){

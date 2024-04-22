@@ -18,7 +18,7 @@ public record RoomResponse(
             problem.getDifficulty(),
             room.getRoomName(),
             room.getInviteCode(),
-            room.isSoloplay()
+            room.isSoloPlay()
         );
     }
 
