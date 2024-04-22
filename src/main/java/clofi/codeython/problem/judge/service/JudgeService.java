@@ -1,6 +1,7 @@
 package clofi.codeython.problem.judge.service;
 
 import clofi.codeython.member.domain.Member;
+import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.problem.domain.Record;
 import clofi.codeython.problem.judge.domain.ResultCalculator;
 import clofi.codeython.problem.judge.domain.creator.ExecutionFileCreator;
@@ -37,9 +38,11 @@ public class JudgeService {
     private final ProblemRepository problemRepository;
     private final TestcaseRepository testcaseRepository;
     private final RecordRepository recordRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
-    public SubmitResponse submit(SubmitRequest submitRequest, Long problemNo, Member member) {
+    public SubmitResponse submit(SubmitRequest submitRequest, Long problemNo, Member tokenMember) {
+        Member member = memberRepository.findByUsername(tokenMember.getUsername());
         Problem problem = problemRepository.findById(problemNo)
                 .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
 
