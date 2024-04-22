@@ -2,8 +2,7 @@ package clofi.codeython.room.domain;
 
 import clofi.codeython.problem.domain.Problem;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,17 +19,18 @@ public class Room {
     @JoinColumn(name = "problem_no", nullable = false)
     private Problem problem;
 
-    @Column(name = "room_name", nullable = false)
+    @Column(name = "room_name", length = 50)
     private String roomName;
 
     @Column(name = "password", length = 4)
+    @Size(min = 4, max = 4, message = "비밀번호는 4자리입니다.")
     private String password;
 
     @Column(name = "is_secret")
     private boolean isSecret;
 
-    @Column(name = "is_soloplay")
-    private boolean isSoloplay;
+    @Column(name = "is_solo_play")
+    private boolean isSoloPlay;
 
     @Column(name = "invite_code", nullable = false, length = 50)
     private String inviteCode;
@@ -38,4 +38,13 @@ public class Room {
     @Column(name = "limit_member_cnt", nullable = false)
     private int limitMemberCnt;
 
+    public Room(String roomName,Problem problem, int limitMemberCnt, boolean isSecret, String password, boolean isSoloPlay, String inviteCode) {
+        this.roomName = roomName;
+        this.problem = problem;
+        this.limitMemberCnt = limitMemberCnt;
+        this.isSecret = isSecret;
+        this.password = password;
+        this.isSoloPlay = isSoloPlay;
+        this.inviteCode = inviteCode;
+    }
 }
