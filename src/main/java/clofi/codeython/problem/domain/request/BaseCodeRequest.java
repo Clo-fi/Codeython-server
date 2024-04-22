@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class BaseCodeRequest {
-    @NotNull
-    @NotBlank(message = "언어는 공백일 수 없습니다.")
+    @NotNull(message = "언어는 공백일 수 없습니다.")
     private LanguageType language;
 
     @NotBlank(message = "코드는 공백일 수 없습니다.")

@@ -1,6 +1,7 @@
 package clofi.codeython.room.controller;
 
 
+import jakarta.validation.Valid;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,7 +51,7 @@ public class RoomController {
 
     @PostMapping("/api/rooms")
     public ResponseEntity<CreateRoomResponse> createRoom(
-            @RequestBody CreateRoomRequest createRoomRequest ) {
+            @RequestBody @Valid CreateRoomRequest createRoomRequest ) {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(roomService.createRoom(createRoomRequest));

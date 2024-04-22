@@ -1,5 +1,6 @@
 package clofi.codeython.problem.controller;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 import clofi.codeython.problem.controller.response.GetProblemResponse;
@@ -23,7 +24,7 @@ public class ProblemController {
 
 	@PostMapping("/api/problems")
 	public ResponseEntity<Long> createProblem(
-		@RequestBody CreateProblemRequest createProblemRequest) {
+		@RequestBody @Valid CreateProblemRequest createProblemRequest) {
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.body(problemService.createProblem(createProblemRequest));
 	}
