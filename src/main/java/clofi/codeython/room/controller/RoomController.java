@@ -46,8 +46,7 @@ public class RoomController {
         @PathVariable String inviteCode,
         @AuthenticationPrincipal CustomMemberDetails userDetails) {
         return roomService.joinRoomWithInviteCode(inviteCode, userDetails);
-
-    private final RoomService roomService;
+    }
 
     @PostMapping("/api/rooms")
     public ResponseEntity<CreateRoomResponse> createRoom(
