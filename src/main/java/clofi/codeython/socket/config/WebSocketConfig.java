@@ -14,14 +14,14 @@ import lombok.RequiredArgsConstructor;
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/wait-service/wait-websocket")
+        registry.addEndpoint("/ws")
             .setAllowedOriginPatterns("*")
             .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/wait-service/waitroom/sub", "/queue");
-        registry.setApplicationDestinationPrefixes("/wait-service");
+        registry.enableSimpleBroker("/sub");
+        registry.setApplicationDestinationPrefixes("/pub");
     }
 }
