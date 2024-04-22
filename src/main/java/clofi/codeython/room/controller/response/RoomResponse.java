@@ -4,6 +4,7 @@ import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.room.domain.Room;
 
 public record RoomResponse(
+    Long roomId,
     String problemTitle,
     Integer limitTime,
     Integer difficulty,
@@ -13,6 +14,7 @@ public record RoomResponse(
 ) {
     public static RoomResponse of(Room room, Problem problem) {
         return new RoomResponse(
+            room.getRoomNo(),
             problem.getTitle(),
             problem.getLimitTime(),
             problem.getDifficulty(),
