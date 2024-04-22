@@ -41,7 +41,6 @@ public class ProblemController {
 		return ResponseEntity.ok(problemService.getProblem(problemNo, userDetails.getMember()));
 	}
 
-
 	@GetMapping("/api/recent-records")
 	public ResponseEntity<List<RecordResponse>> getRecord(
 		@AuthenticationPrincipal CustomMemberDetails userDetails) {

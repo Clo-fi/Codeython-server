@@ -230,17 +230,15 @@ class ProblemServiceTest {
 
     }
 
-    @DisplayName("문제조회 - 문제가 없을 경우")
+    @DisplayName("문제조회 - 등록된 문제가 없으면 빈 리스트가 반환된다.")
     @Test
     void getAllProblemWithNotTest() {
         //given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         //when
+        List<AllProblemResponse> problems = problemService.getAllProblem(member);
         //then
-        assertThatThrownBy(() ->
-                problemService.getAllProblem(member))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("등록된 문제가 없습니다.");
+        assertThat(problems).isEmpty();
     }
 
     @DisplayName("문제 상세 조회")

@@ -46,12 +46,9 @@ public class ProblemService {
         return problem.getProblemNo();
     }
 
-    public List<AllProblemResponse> getAllProblem(Member member) {
+    public List<AllProblemResponse> getAllProblem(Member tokenMember) {
+        Member member = memberRepository.findByUsername(tokenMember.getUsername());
         List<Problem> problems = problemRepository.findAll();
-
-        if (problems.isEmpty()){
-            throw new EntityNotFoundException("등록된 문제가 없습니다.");
-        }
 
         return problems.stream().map(problem -> {
             List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
@@ -62,8 +59,8 @@ public class ProblemService {
 
     }
 
-    public GetProblemResponse getProblem(Long problemNo, Member member) {
-
+    public GetProblemResponse getProblem(Long problemNo, Member tokenMember) {
+        Member member = memberRepository.findByUsername(tokenMember.getUsername());
         if (problemRepository.findByProblemNo(problemNo) == null){
             throw new EntityNotFoundException("등록된 문제가 없습니다.");
         }
