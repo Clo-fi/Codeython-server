@@ -1,5 +1,7 @@
 package clofi.codeython.member.service;
 
+import clofi.codeython.member.controller.response.RankerResponse;
+import clofi.codeython.member.controller.response.RankingResponse;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +17,12 @@ import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.member.service.dto.CustomMemberDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -64,4 +72,30 @@ public class MemberService implements UserDetailsService {
         }
         return null;
     }
+
+    public RankingResponse ranking(String userName) {
+        Member member = memberRepository.findByUsername(userName);
+        List<Member> members = memberRepository.findAll();
+
+        List<Member> top5Members = memberRepository.findTop5ByOrderByExpDesc();
+        List<RankerResponse> rankerResponses = new ArrayList<>();
+
+
+        int userRank = -1;
+        for (int i = 0; i < top5Members.size(); i++) {
+            Member currentMember = top5Members.get(i);
+            rankerResponses.add(new RankerResponse(currentMember.getNickname(), i + 1));
+
+            if (currentMember.getUserNo().equals(member.getUserNo())) {
+                userRank = i + 1;
+            }
+        }
+
+        if (userRank == -1) {
+            userRank = memberRepository.findAllByOrderByExpDesc().indexOf(member) + 1;
+        }
+
+        return RankingResponse.of(rankerResponses, userRank);
+    }
+
 }
