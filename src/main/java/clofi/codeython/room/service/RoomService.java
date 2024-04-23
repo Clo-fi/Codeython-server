@@ -113,8 +113,12 @@ public class RoomService {
     }
 
     private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
+
         Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
         RoomMember roomMember = new RoomMember(room, member, isOwner);
+        if (roomMemberRepository.existsRoomMemberByRoomAndUser(room, member)) {
+            throw new IllegalArgumentException("이미 참여한 방 입니다.");
+        }
         roomMemberRepository.save(roomMember);
         notifyRoomParticipants(room, member);
 
@@ -122,7 +126,13 @@ public class RoomService {
     }
 
     private void notifyRoomParticipants(Room room, Member member) {
-        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), member.getExp());
-        messagingTemplate.convertAndSend("/topic/rooms/" + room.getRoomNo(), socketUserResponse);
+        Integer level = 1;
+        Integer exp = member.getExp();
+        if (exp >= 100) {
+            level = exp / 100 + 1;
+            exp = exp % 100;
+        }
+        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), level, exp);
+        messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), socketUserResponse);
     }
 }
