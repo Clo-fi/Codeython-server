@@ -1,7 +1,10 @@
 package clofi.codeython.common.config;
 
-import java.util.Collections;
-
+import clofi.codeython.jwt.JWTFilter;
+import clofi.codeython.jwt.JWTUtil;
+import clofi.codeython.jwt.LoginFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,11 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import clofi.codeython.jwt.JWTFilter;
-import clofi.codeython.jwt.JWTUtil;
-import clofi.codeython.jwt.LoginFilter;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import java.util.Collections;
 
 @Configuration
 @RequiredArgsConstructor
@@ -46,55 +45,55 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //csrf disable
         http
-            .csrf((csrf) -> csrf.disable());
+                .csrf((csrf) -> csrf.disable());
 
         //Form 로그인 방식 disable
         http
-            .formLogin((form) -> form.disable());
+                .formLogin((form) -> form.disable());
 
         //http basic 인증 방식 disable
         http
-            .httpBasic((httpBasic) -> httpBasic.disable());
+                .httpBasic((httpBasic) -> httpBasic.disable());
 
         http
-            .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/ws/**", "/api/login", "/api/signup", "/h2-console/**").permitAll()
-                .anyRequest().authenticated());
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/ws/**", "/api/login", "/api/signup", "/h2-console/**").permitAll()
+                        .anyRequest().authenticated());
         http
-            .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
-
-        http
-            .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
-                UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
-            .sessionManagement((session) -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class);
 
         http
-            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http
-            .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
-                @Override
-                public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+        http
+                .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
 
-                    CorsConfiguration configuration = new CorsConfiguration();
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 
-                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                    configuration.setAllowedOrigins(
-                        Collections.singletonList("https://k1964add55381a.user-app.krampoline.com/"));
-                    configuration.setAllowedMethods(Collections.singletonList("*"));
-                    configuration.setAllowCredentials(true);
-                    configuration.setAllowedHeaders(Collections.singletonList("*"));
-                    configuration.setMaxAge(3600L);
+                        CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+                        configuration.setAllowedOrigins(
+                                Collections.singletonList("https://k1964add55381a.user-app.krampoline.com/"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
 
-                    return configuration;
-                }
-            })));
+                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+                        return configuration;
+                    }
+                })));
 
         return http.build();
     }

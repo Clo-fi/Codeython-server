@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public class ExceptionResult {
-	private String message;
+    private String message;
 
-	public ExceptionResult(String message) {
-		this.message = message;
-	}
+    public ExceptionResult(String message) {
+        this.message = message;
+    }
 }

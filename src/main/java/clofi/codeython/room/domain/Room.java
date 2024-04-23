@@ -38,7 +38,8 @@ public class Room {
     @Column(name = "limit_member_cnt", nullable = false)
     private int limitMemberCnt;
 
-    public Room(String roomName,Problem problem, int limitMemberCnt, boolean isSecret, String password, boolean isSoloPlay, String inviteCode) {
+    public Room(String roomName, Problem problem, int limitMemberCnt, boolean isSecret, String password,
+                boolean isSoloPlay, String inviteCode) {
         this.roomName = roomName;
         this.problem = problem;
         this.limitMemberCnt = limitMemberCnt;

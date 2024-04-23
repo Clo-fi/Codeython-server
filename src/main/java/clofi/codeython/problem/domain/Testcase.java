@@ -1,13 +1,13 @@
 package clofi.codeython.problem.domain;
 
-import clofi.codeython.common.util.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Entity @Getter
+@Entity
+@Getter
 @NoArgsConstructor
 public class Testcase {
     @Id

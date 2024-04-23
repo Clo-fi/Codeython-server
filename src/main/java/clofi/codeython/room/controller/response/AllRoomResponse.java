@@ -3,15 +3,15 @@ package clofi.codeython.room.controller.response;
 import clofi.codeython.room.domain.Room;
 
 public record AllRoomResponse(
-    Long roomId,
-    String roomName,
-    String problemTitle,
-    int limitMemberCnt,
-    int playMemberCnt,
-    boolean isSecret,
-    boolean isSoloPlay
+        Long roomId,
+        String roomName,
+        String problemTitle,
+        int limitMemberCnt,
+        int playMemberCnt,
+        boolean isSecret,
+        boolean isSoloPlay
 ) {
-    public static AllRoomResponse of(Room room, int playMemberCnt){
+    public static AllRoomResponse of(Room room, int playMemberCnt) {
         return new AllRoomResponse(
                 room.getRoomNo(),
                 room.getRoomName(),

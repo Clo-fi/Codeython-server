@@ -14,7 +14,7 @@ public record GetProblemResponse(
         int difficulty
 ) {
     public static GetProblemResponse of(
-            Problem problem,  List<BaseCodeResponse> baseCode, List<TestcaseResponse> testcase) {
+            Problem problem, List<BaseCodeResponse> baseCode, List<TestcaseResponse> testcase) {
         return new GetProblemResponse(
                 problem.getTitle(),
                 problem.getContent(),

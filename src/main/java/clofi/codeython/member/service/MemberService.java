@@ -1,15 +1,8 @@
 package clofi.codeython.member.service;
 
+import clofi.codeython.member.controller.response.MemberResponse;
 import clofi.codeython.member.controller.response.RankerResponse;
 import clofi.codeython.member.controller.response.RankingResponse;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import clofi.codeython.member.controller.response.MemberResponse;
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.domain.request.CreateMemberRequest;
 import clofi.codeython.member.domain.request.UpdateMemberRequest;
@@ -17,12 +10,15 @@ import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.member.service.dto.CustomMemberDetails;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +41,7 @@ public class MemberService implements UserDetailsService {
     public Long update(String userName, UpdateMemberRequest updateMemberRequest) {
         Member memberId = memberRepository.findByUsername(userName);
         Member member = memberRepository.findByUserNo(memberId.getUserNo())
-            .orElseThrow(() -> new EntityNotFoundException("일치하는 사용자가 없습니다."));
+                .orElseThrow(() -> new EntityNotFoundException("일치하는 사용자가 없습니다."));
         if (memberRepository.existsByNickname(updateMemberRequest.getNickname())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -79,7 +75,6 @@ public class MemberService implements UserDetailsService {
 
         List<Member> top5Members = memberRepository.findTop5ByOrderByExpDesc();
         List<RankerResponse> rankerResponses = new ArrayList<>();
-
 
         int userRank = -1;
         for (int i = 0; i < top5Members.size(); i++) {

@@ -6,14 +6,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
-import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 
-@Entity @Getter
+@Entity
+@Getter
 @DynamicInsert
 @NoArgsConstructor
 public class Problem extends BaseEntity {

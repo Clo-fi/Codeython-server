@@ -1,10 +1,11 @@
 package clofi.codeython.problem.judge.domain.creator;
 
+import org.springframework.stereotype.Component;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
 @Component
 public class JavascriptExecutionFileCreator implements ExecutionFileCreator {

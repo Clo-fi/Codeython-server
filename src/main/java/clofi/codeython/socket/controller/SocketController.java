@@ -1,20 +1,15 @@
 package clofi.codeython.socket.controller;
 
+import clofi.codeython.socket.controller.response.ChatMessage;
 import clofi.codeython.socket.controller.response.DataResponse;
 import clofi.codeython.socket.controller.response.DataType;
-import java.util.List;
-
-import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.RestController;
-
-import clofi.codeython.socket.controller.response.ChatMessage;
 import clofi.codeython.socket.controller.response.SocketUserResponse;
 import clofi.codeython.socket.service.SocketService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
