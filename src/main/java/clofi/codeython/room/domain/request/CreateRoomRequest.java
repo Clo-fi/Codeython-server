@@ -4,7 +4,6 @@ import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.room.domain.Room;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,21 +22,21 @@ public class CreateRoomRequest {
     @NotNull(message = "인원 제한 수는 공백일 수 없습니다.")
     private int limitMemberCnt;
 
-    private boolean isSecret;
+    private Boolean isSecret;
 
     private String password;
 
-    private boolean isSoloPlay;
+    private Boolean isSoloPlay;
 
     public Room toRoom(Problem problem, String inviteCode) {
         return new Room(
-                roomName,
-                problem,
-                limitMemberCnt,
-                isSecret,
-                password,
-                isSoloPlay,
-                inviteCode
+            roomName,
+            problem,
+            limitMemberCnt,
+            isSecret,
+            password,
+            isSoloPlay,
+            inviteCode
         );
     }
 
