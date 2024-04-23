@@ -1,6 +1,6 @@
 package clofi.codeython.member.controller.response;
 
 public record RankerResponse(
-        String nickname, int rank
+        String nickname, int rank, int level
 ) {
 }
