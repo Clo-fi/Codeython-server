@@ -72,7 +72,7 @@ public class RoomService {
             throw new IllegalArgumentException("이미 만들어진 경기장 이름입니다.");
         }
 
-        if (createRoomRequest.isSecret()) {
+        if (createRoomRequest.getIsSecret()) {
             secretRoomPasswordValidate(createRoomRequest.getPassword());
         }
 

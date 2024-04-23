@@ -15,7 +15,7 @@ public class Room {
     @Column(name = "room_no", nullable = false)
     private Long roomNo;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "problem_no", nullable = false)
     private Problem problem;
 
