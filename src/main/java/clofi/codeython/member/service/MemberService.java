@@ -90,7 +90,7 @@ public class MemberService implements UserDetailsService {
         return RankingResponse.of(rankerResponses, userRank);
     }
 
-    public int calculateUserLevel(int exp){
+    private int calculateUserLevel(int exp){
         int level = 1;
         if (exp > 100) {
             level = exp / 100 + 1;
