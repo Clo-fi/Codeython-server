@@ -72,14 +72,8 @@ public class RoomService {
             throw new IllegalArgumentException("이미 만들어진 경기장 이름입니다.");
         }
 
-        try {
-            Integer.valueOf(createRoomRequest.getPassword());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("비밀번호는 숫자여야 합니다.");
-        }
-
-        if (createRoomRequest.getPassword().length() != 4) {
-            throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
+        if (createRoomRequest.getIsSecret()) {
+            secretRoomPasswordValidate(createRoomRequest.getPassword());
         }
 
         if (!(createRoomRequest.getLimitMemberCnt() == 2 || createRoomRequest.getLimitMemberCnt() == 4
@@ -94,6 +88,18 @@ public class RoomService {
         Room room = roomRepository.save(createRoomRequest.toRoom(problem, inviteCode));
 
         return CreateRoomResponse.of(room);
+    }
+
+    private void secretRoomPasswordValidate(String password) {
+        try {
+            Integer.valueOf(password);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("비밀번호는 숫자여야 합니다.");
+        }
+
+        if (password.length() != 4) {
+            throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
+        }
     }
 
     public List<AllRoomResponse> getAllRoom() {
