@@ -88,6 +88,9 @@ public class RoomService {
             throw new IllegalArgumentException("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
         }
         Problem problem = problemRepository.findByProblemNo(createRoomRequest.getProblemId());
+        if (problem == null) {
+            throw new IllegalArgumentException("해당 문제가 없습니다.");
+        }
 
         UUID uuid = UUID.randomUUID();
         String inviteCode = uuid.toString().substring(0, uuid.toString().indexOf("-"));
