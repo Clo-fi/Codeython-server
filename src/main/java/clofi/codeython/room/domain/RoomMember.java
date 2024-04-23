@@ -1,7 +1,15 @@
 package clofi.codeython.room.domain;
 
 import clofi.codeython.member.domain.Member;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class RoomMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="room_member_no", nullable = false)
+    @Column(name = "room_member_no", nullable = false)
     private Long roomMemberNo;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -29,5 +37,9 @@ public class RoomMember {
         this.room = room;
         this.user = user;
         this.isOwner = isOwner;
+    }
+
+    public void updateOwner(boolean b) {
+        this.isOwner = b;
     }
 }
