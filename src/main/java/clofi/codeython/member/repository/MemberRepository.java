@@ -19,7 +19,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Member findByNickname(String nickName);
 
-	List<Member> findTop5ByOrderByExpDesc();
+    List<Member> findTop5ByOrderByExpDesc();
 
     List<Member> findAllByOrderByExpDesc();
 }
