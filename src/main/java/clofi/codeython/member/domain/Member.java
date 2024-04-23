@@ -41,6 +41,13 @@ public class Member extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    public Member(String username, String password, String nickname, Integer exp) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.exp = exp;
+    }
+
     public Member(String username, String password, String nickname) {
         this.username = username;
         this.password = password;

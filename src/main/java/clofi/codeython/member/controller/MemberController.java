@@ -1,5 +1,6 @@
 package clofi.codeython.member.controller;
 
+import clofi.codeython.member.controller.response.RankingResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -43,4 +44,12 @@ public class MemberController {
 		String username = userDetails.getUsername();
 		return ResponseEntity.status(HttpStatus.OK).body(memberService.update(username, updateMemberRequest));
 	}
+
+	@GetMapping("/api/ranking")
+	public ResponseEntity<RankingResponse> ranking(
+			@AuthenticationPrincipal CustomMemberDetails userDetails){
+		String username = userDetails.getUsername();
+		return ResponseEntity.ok(memberService.ranking(username));
+	}
+
 }
