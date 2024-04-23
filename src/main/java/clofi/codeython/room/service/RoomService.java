@@ -1,5 +1,13 @@
 package clofi.codeython.room.service;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.member.service.dto.CustomMemberDetails;
@@ -16,13 +24,6 @@ import clofi.codeython.room.repository.RoomRepository;
 import clofi.codeython.room.service.request.WaitRoomRequest;
 import clofi.codeython.socket.controller.response.SocketUserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,13 +39,19 @@ public class RoomService {
     public RoomResponse joinRoomWithPassword(WaitRoomRequest request, Long roomId, CustomMemberDetails userDetails) {
         Member member = memberRepository.findByUsername(userDetails.getUsername());
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
 
         List<RoomMember> roomMember = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
-
-        if (request.getPassword() != null && !room.getPassword().equals(request.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 틀립니다");
+        if (room.isSecret()) {
+            if (!room.getPassword().equals(request.getPassword())) {
+                throw new IllegalArgumentException("비밀번호가 틀립니다");
+            }
+        } else {
+            if (request.getPassword() != null) {
+                throw new IllegalArgumentException("공개방은 비밀번호가 필요 없습니다");
+            }
         }
+
         if (roomMember.size() >= room.getLimitMemberCnt()) {
             throw new IllegalArgumentException("방이 꽉 찼습니다");
         }
@@ -77,10 +84,13 @@ public class RoomService {
         }
 
         if (!(createRoomRequest.getLimitMemberCnt() == 2 || createRoomRequest.getLimitMemberCnt() == 4
-                || createRoomRequest.getLimitMemberCnt() == 6)) {
+            || createRoomRequest.getLimitMemberCnt() == 6)) {
             throw new IllegalArgumentException("인원 제한 수는 2, 4, 6 중 하나여야 합니다.");
         }
         Problem problem = problemRepository.findByProblemNo(createRoomRequest.getProblemId());
+        if (problem == null) {
+            throw new IllegalArgumentException("해당 문제가 없습니다.");
+        }
 
         UUID uuid = UUID.randomUUID();
         String inviteCode = uuid.toString().substring(0, uuid.toString().indexOf("-"));
@@ -106,12 +116,12 @@ public class RoomService {
         List<Room> rooms = roomRepository.findAll();
 
         return rooms.stream()
-                .map(room -> {
-                    List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
-                    int playMemberCount = roomMembers.size();
-                    return AllRoomResponse.of(room, playMemberCount);
-                })
-                .collect(Collectors.toList());
+            .map(room -> {
+                List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+                int playMemberCount = roomMembers.size();
+                return AllRoomResponse.of(room, playMemberCount);
+            })
+            .collect(Collectors.toList());
     }
 
     private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
