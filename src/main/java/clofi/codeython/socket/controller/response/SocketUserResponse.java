@@ -4,12 +4,14 @@ import clofi.codeython.member.domain.Member;
 
 public record SocketUserResponse(
     String nickname,
+    Integer level,
     Integer exp
 ) {
-    public static SocketUserResponse of(Member member) {
+    public static SocketUserResponse of(Member member, Integer level, Integer exp) {
         return new SocketUserResponse(
             member.getNickname(),
-            member.getExp()
+            level,
+            exp
         );
     }
 }

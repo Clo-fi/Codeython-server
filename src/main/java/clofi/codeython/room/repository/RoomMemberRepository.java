@@ -14,4 +14,6 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Integer>
     List<RoomMember> findAllByRoomRoomNo(Long roomNo);
 
     void deleteByRoomAndUser(Room room, Member user);
+
+    boolean existsRoomMemberByRoomAndUser(Room room, Member member);
 }
