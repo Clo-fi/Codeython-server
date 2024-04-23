@@ -52,11 +52,7 @@ public class MemberService implements UserDetailsService {
     public MemberResponse getMember(String userName) {
         Member member = memberRepository.findByUsername(userName);
         Integer exp = member.getExp();
-        int level = 1;
-        if (exp > 100) {
-            level = exp / 100 + 1;
-            exp = exp % 100;
-        }
+        int level = calculateUserLevel(exp);
         return MemberResponse.of(member, level, exp);
     }
 
@@ -79,7 +75,8 @@ public class MemberService implements UserDetailsService {
         int userRank = -1;
         for (int i = 0; i < top5Members.size(); i++) {
             Member currentMember = top5Members.get(i);
-            rankerResponses.add(new RankerResponse(currentMember.getNickname(), i + 1));
+            rankerResponses.add(new RankerResponse(
+                    currentMember.getNickname(), i + 1, calculateUserLevel(currentMember.getExp())));
 
             if (currentMember.getUserNo().equals(member.getUserNo())) {
                 userRank = i + 1;
@@ -91,6 +88,15 @@ public class MemberService implements UserDetailsService {
         }
 
         return RankingResponse.of(rankerResponses, userRank);
+    }
+
+    public int calculateUserLevel(int exp){
+        int level = 1;
+        if (exp > 100) {
+            level = exp / 100 + 1;
+            exp = exp % 100;
+        }
+        return level;
     }
 
 }

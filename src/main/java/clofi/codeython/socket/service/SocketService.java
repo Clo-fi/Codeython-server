@@ -28,7 +28,7 @@ public class SocketService {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
         List<RoomMember> roomMemberList = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
-
+        
         return roomMemberList.stream().map(m -> {
             Member member = m.getUser();
             Map<String, Integer> levelAndExp = calculateLevelAndExp(member);
