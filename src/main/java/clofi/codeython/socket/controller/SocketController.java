@@ -21,7 +21,7 @@ public class SocketController {
     private final SocketService socketService;
 
     @MessageMapping("/room/{roomId}/join")
-    @SendTo("/sub/rooms/{roomId}")
+    @SendTo("/sub/room/{roomId}")
     public List<SocketUserResponse> joinRoom(
         @DestinationVariable Long roomId,
         @Header("nickname") String nickName,
@@ -31,7 +31,7 @@ public class SocketController {
     }
 
     @MessageMapping("/room/{roomId}/leave")
-    @SendTo("/sub/rooms/{roomId}")
+    @SendTo("/sub/room/{roomId}")
     public List<SocketUserResponse> leaveRoom(
         @DestinationVariable Long roomId,
         @Header("nickname") String nickName,
@@ -41,7 +41,7 @@ public class SocketController {
     }
 
     @MessageMapping("/room/{roomId}/chat")
-    @SendTo("/sub/rooms/{roomId}/chat")
+    @SendTo("/sub/room/{roomId}/chat")
     public ChatMessage sendChatMessage(
         @DestinationVariable Long roomId,
         @Payload ChatMessage chatMessage

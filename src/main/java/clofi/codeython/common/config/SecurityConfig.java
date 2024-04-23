@@ -58,7 +58,7 @@ public class SecurityConfig {
 
         http
             .authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/login", "/api/signup", "/h2-console/**").permitAll()
+                .requestMatchers("/ws/**", "/api/login", "/api/signup", "/h2-console/**").permitAll()
                 .anyRequest().authenticated());
         http
             .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
