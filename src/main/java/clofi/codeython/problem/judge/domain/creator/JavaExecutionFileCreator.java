@@ -1,13 +1,10 @@
 package clofi.codeython.problem.judge.domain.creator;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import org.springframework.stereotype.Component;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
 @Component
 public class JavaExecutionFileCreator implements ExecutionFileCreator {
@@ -72,7 +69,8 @@ public class JavaExecutionFileCreator implements ExecutionFileCreator {
 
     private void compile(String route) {
         ArrayList<String> commands = new ArrayList<>(
-                List.of("javac", "-cp", JAVA_LIBRARY_PATH, "-sourcepath", "./" + route, String.format("%sMain.java", route)));
+                List.of("javac", "-cp", JAVA_LIBRARY_PATH, "-sourcepath", "./" + route,
+                        String.format("%sMain.java", route)));
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
 
         StringBuilder errorMessage = new StringBuilder();

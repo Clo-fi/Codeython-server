@@ -30,13 +30,13 @@ public class CreateRoomRequest {
 
     public Room toRoom(Problem problem, String inviteCode) {
         return new Room(
-            roomName,
-            problem,
-            limitMemberCnt,
-            isSecret,
-            password,
-            isSoloPlay,
-            inviteCode
+                roomName,
+                problem,
+                limitMemberCnt,
+                isSecret,
+                password,
+                isSoloPlay,
+                inviteCode
         );
     }
 

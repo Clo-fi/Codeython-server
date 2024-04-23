@@ -1,11 +1,10 @@
 package clofi.codeython.member.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import clofi.codeython.member.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import clofi.codeython.member.domain.Member;
+import java.util.List;
+import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 

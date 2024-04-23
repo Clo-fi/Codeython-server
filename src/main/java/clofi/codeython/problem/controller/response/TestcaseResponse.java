@@ -1,7 +1,5 @@
 package clofi.codeython.problem.controller.response;
 
-import lombok.Getter;
-
 import java.util.List;
 
 

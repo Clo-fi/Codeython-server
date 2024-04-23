@@ -2,7 +2,6 @@ package clofi.codeython.room.service;
 
 import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.repository.ProblemRepository;
-import clofi.codeython.problem.service.ProblemService;
 import clofi.codeython.room.controller.response.AllRoomResponse;
 import clofi.codeython.room.controller.response.CreateRoomResponse;
 import clofi.codeython.room.domain.request.CreateRoomRequest;
@@ -30,14 +29,14 @@ class RoomServiceTest {
 
 
     @AfterEach
-    void afterEach(){
+    void afterEach() {
         roomRepository.deleteAllInBatch();
         problemRepository.deleteAllInBatch();
     }
 
     @DisplayName("경기장 생성")
     @Test
-    void createRoomTest(){
+    void createRoomTest() {
         //given
         Problem problem = new Problem(
                 "where is koreanCow",
@@ -66,7 +65,7 @@ class RoomServiceTest {
 
     @DisplayName("비밀번호가 숫자가 아닐경우 예외 발생")
     @Test
-    void createRoomExceptionTest(){
+    void createRoomExceptionTest() {
         //given
         Problem problem = new Problem(
                 "where is koreanCow",
@@ -97,7 +96,7 @@ class RoomServiceTest {
 
     @DisplayName("비밀번호가 4자리가 아닐경우 예외 발생")
     @Test
-    void createRoomPasswordExceptionTest(){
+    void createRoomPasswordExceptionTest() {
         //given
         Problem problem = new Problem(
                 "where is koreanCow",
@@ -128,7 +127,7 @@ class RoomServiceTest {
 
     @DisplayName("인원 제한 수가 2,4,6이 아닐 경우 예외")
     @Test
-    void createRoomLimitMemberCntExceptionTest(){
+    void createRoomLimitMemberCntExceptionTest() {
         //given
         Problem problem = new Problem(
                 "where is koreanCow",
@@ -159,7 +158,7 @@ class RoomServiceTest {
 
     @DisplayName("경기장 리스트 조회")
     @Test
-    void getAllRoomsTest(){
+    void getAllRoomsTest() {
         //given
         Problem problem1 = new Problem(
                 "where is koreanCow",
@@ -196,7 +195,6 @@ class RoomServiceTest {
                 "0000",
                 true
         );
-
 
         //when
         roomService.createRoom(createRoomRequest1);

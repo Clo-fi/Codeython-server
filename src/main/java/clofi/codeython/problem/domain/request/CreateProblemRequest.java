@@ -1,7 +1,9 @@
 package clofi.codeython.problem.domain.request;
 
-import clofi.codeython.problem.domain.*;
-import jakarta.validation.constraints.Max;
+import clofi.codeython.problem.domain.Language;
+import clofi.codeython.problem.domain.LanguageType;
+import clofi.codeython.problem.domain.Problem;
+import clofi.codeython.problem.domain.Testcase;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -9,9 +11,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 import java.util.List;
-import org.hibernate.validator.constraints.Range;
 
 @Getter
 @AllArgsConstructor

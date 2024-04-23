@@ -3,14 +3,14 @@ package clofi.codeython.member.controller.response;
 import clofi.codeython.member.domain.Member;
 
 public record MemberResponse(
-    String nickname,
-    Integer level,
-    Integer exp) {
+        String nickname,
+        Integer level,
+        Integer exp) {
     public static MemberResponse of(Member member, Integer level, Integer exp) {
         return new MemberResponse(
-            member.getNickname(),
-            level,
-            exp
+                member.getNickname(),
+                level,
+                exp
         );
     }
 }

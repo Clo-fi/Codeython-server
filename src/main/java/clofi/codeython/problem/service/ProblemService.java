@@ -1,24 +1,26 @@
 package clofi.codeython.problem.service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import clofi.codeython.problem.controller.response.*;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
+import clofi.codeython.problem.controller.response.*;
 import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.domain.Record;
 import clofi.codeython.problem.domain.request.BaseCodeRequest;
 import clofi.codeython.problem.domain.request.CreateProblemRequest;
 import clofi.codeython.problem.domain.request.TestcaseRequest;
-import clofi.codeython.problem.repository.*;
+import clofi.codeython.problem.repository.LanguageRepository;
+import clofi.codeython.problem.repository.ProblemRepository;
+import clofi.codeython.problem.repository.RecordRepository;
+import clofi.codeython.problem.repository.TestcaseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +29,23 @@ public class ProblemService {
     private final ProblemRepository problemRepository;
     private final LanguageRepository languageRepository;
     private final TestcaseRepository testcaseRepository;
-	private final RecordRepository recordRepository;
-	private final MemberRepository memberRepository;
+    private final RecordRepository recordRepository;
+    private final MemberRepository memberRepository;
 
-    public Long createProblem(CreateProblemRequest createProblemRequest){
-        if (problemRepository.existsByTitle(createProblemRequest.getTitle())){
+    public Long createProblem(CreateProblemRequest createProblemRequest) {
+        if (problemRepository.existsByTitle(createProblemRequest.getTitle())) {
             throw new IllegalArgumentException("이미 만들어진 문제 제목입니다.");
         }
 
         Problem problem = problemRepository.save(createProblemRequest.toProblem());
         for (BaseCodeRequest baseCode : createProblemRequest.getBaseCodes()) {
-            languageRepository.save(createProblemRequest.toLanguage(problem,baseCode.getLanguage(),baseCode.getCode()));
+            languageRepository.save(
+                    createProblemRequest.toLanguage(problem, baseCode.getLanguage(), baseCode.getCode()));
         }
         for (TestcaseRequest testcase : createProblemRequest.getTestcase()) {
-            testcaseRepository.save(createProblemRequest.toTestcase(problem, testcase.getInputCase(), testcase.getOutputCase(), testcase.getDescription()));
+            testcaseRepository.save(
+                    createProblemRequest.toTestcase(problem, testcase.getInputCase(), testcase.getOutputCase(),
+                            testcase.getDescription()));
         }
 
         return problem.getProblemNo();
@@ -61,7 +66,7 @@ public class ProblemService {
 
     public GetProblemResponse getProblem(Long problemNo, Member tokenMember) {
         Member member = memberRepository.findByUsername(tokenMember.getUsername());
-        if (problemRepository.findByProblemNo(problemNo) == null){
+        if (problemRepository.findByProblemNo(problemNo) == null) {
             throw new EntityNotFoundException("등록된 문제가 없습니다.");
         }
         Problem problem = problemRepository.findByProblemNo(problemNo);
@@ -70,7 +75,8 @@ public class ProblemService {
         List<BaseCodeResponse> baseCodes = languageRepository.findByProblem(problem)
                 .stream()
                 .map(bc -> {
-                    Optional<Record> record = records.stream().filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
+                    Optional<Record> record = records.stream()
+                            .filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
                             .findAny();
                     return record.map(r -> new BaseCodeResponse(bc.getLanguage(), r.getWrittenCode()))
                             .orElseGet(() -> new BaseCodeResponse(bc.getLanguage(), bc.getBaseCode()));
@@ -79,7 +85,7 @@ public class ProblemService {
 
         List<TestcaseResponse> testcases = testcaseRepository.findByProblem(problem)
                 .stream()
-                .map(tc -> new TestcaseResponse(tc.getInput(),tc.getOutput(),tc.getDescription()))
+                .map(tc -> new TestcaseResponse(tc.getInput(), tc.getOutput(), tc.getDescription()))
                 .collect(Collectors.toList());
 
         return GetProblemResponse.of(

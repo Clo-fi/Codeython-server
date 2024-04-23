@@ -1,12 +1,13 @@
 package clofi.codeython.problem.judge.domain.runner;
 
+import org.springframework.stereotype.Component;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.stereotype.Component;
 
 @Component
 public class JavaCodeRunner implements CodeRunner {

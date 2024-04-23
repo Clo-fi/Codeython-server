@@ -1,14 +1,9 @@
 package clofi.codeython.problem.judge.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.problem.domain.Language;
-import clofi.codeython.problem.domain.LanguageType;
-import clofi.codeython.problem.domain.Problem;
 import clofi.codeython.problem.domain.Record;
-import clofi.codeython.problem.domain.Testcase;
+import clofi.codeython.problem.domain.*;
 import clofi.codeython.problem.judge.dto.ExecutionRequest;
 import clofi.codeython.problem.judge.dto.ExecutionResponse;
 import clofi.codeython.problem.judge.dto.SubmitRequest;
@@ -17,13 +12,16 @@ import clofi.codeython.problem.repository.LanguageRepository;
 import clofi.codeython.problem.repository.ProblemRepository;
 import clofi.codeython.problem.repository.RecordRepository;
 import clofi.codeython.problem.repository.TestcaseRepository;
-import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class JudgeServiceTest {
