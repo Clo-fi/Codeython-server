@@ -144,7 +144,8 @@ public class RoomService {
             level = exp / 100 + 1;
             exp = exp % 100;
         }
-        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), level, exp);
+        RoomMember roomMemberUser = roomMemberRepository.findByUser(member);
+        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), level, exp, roomMemberUser.isOwner());
         messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), socketUserResponse);
     }
 }
