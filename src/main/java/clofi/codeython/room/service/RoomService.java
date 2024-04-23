@@ -35,9 +35,7 @@ public class RoomService {
     private final ProblemRepository problemRepository;
     private final RoomMemberRepository roomMemberRepository;
     private final MemberRepository memberRepository;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
 
     public RoomResponse joinRoomWithPassword(WaitRoomRequest request, Long roomId, CustomMemberDetails userDetails) {
         Member member = memberRepository.findByUsername(userDetails.getUsername());
