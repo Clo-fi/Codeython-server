@@ -41,7 +41,7 @@ public class SocketController {
     }
 
     @MessageMapping("/room/{roomId}/chat")
-    @SendTo("/sub/room/{roomId}/chat")
+    @SendTo("/sub/room/{roomId}")
     public ChatMessage sendChatMessage(
         @DestinationVariable Long roomId,
         @Payload ChatMessage chatMessage
@@ -49,5 +49,12 @@ public class SocketController {
         return chatMessage;
     }
 
+    @MessageMapping("/room/{roomId}/gameStart")
+    @SendTo("/sub/room/{roomId}")
+    public String gameStartMessage(
+        @DestinationVariable Long roomId
+    ) {
+        return "게임이 시작되었습니다";
+    }
 }
 

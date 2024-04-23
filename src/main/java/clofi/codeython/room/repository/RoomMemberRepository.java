@@ -16,4 +16,6 @@ public interface RoomMemberRepository extends JpaRepository<RoomMember, Integer>
     void deleteByRoomAndUser(Room room, Member user);
 
     boolean existsRoomMemberByRoomAndUser(Room room, Member member);
+
+    RoomMember findByUser(Member member);
 }
