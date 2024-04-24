@@ -187,10 +187,12 @@ public class RoomService {
 
     public void gameStart(Long roomId) {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("없는 방 번호입니다."));
-        room.gameStart();
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
-        roomMembers.forEach(RoomMember::accuracyReset);
-        room.updatePlayerCount(roomMembers.size());
+        if (roomMembers.size() == 1) {
+            throw new IllegalArgumentException("혼자서 게임을 시작할 수 없습니다.");
+        }
+        room.gameStart(roomMembers.size());
+        roomMembers.forEach(RoomMember::resetGameStatus);
     }
 
     public List<GameEndResponse> getGameResult(Long roomId) {
@@ -204,25 +206,26 @@ public class RoomService {
         List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
         Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
 
-        Integer totalPlayerCount = room.getPlayerCount();
+        int totalPlayerCount = room.getPlayerCount();
         roomMembers.sort((rm1, rm2) -> rm2.getAccuracy() - rm1.getAccuracy());
 
         int preAccuracy = -1;
-        int grade = 1;
+        int grade = room.getCorrectPlayerCount() + 1;
         int tie = 0;
 
         List<GameEndResponse> gameEndResponses = new ArrayList<>();
         for (RoomMember roomMember : roomMembers) {
-            Integer accuracy = roomMember.getAccuracy();
-            if (accuracy == null) {
-                accuracy = 0;
+            if (roomMember.isAlreadyCorrected()) {
+                gameEndResponses.add(new GameEndResponse(roomMember.getUser().getUserNo(), roomMember.getUser().getNickname(), roomMember.getGrade(), roomMember.getGainExp()));
+                continue;
             }
+
+            int accuracy = roomMember.getAccuracy();
             int gainExp = (int) (accuracy * totalPlayerCount * (0.1 - (grade - 1) * 0.02));
             gameEndResponses.add(new GameEndResponse(roomMember.getUser().getUserNo(), roomMember.getUser().getNickname(), grade, gainExp));
-            if (accuracy != 100) {
-                roomMember.getUser().gainExp(gainExp);
-                recordRepository.save(Record.of(roomMember.getUser(), problem, accuracy, grade, room.getPlayerCount()));
-            }
+            roomMember.getUser().increaseExp(gainExp);
+            recordRepository.save(Record.of(roomMember.getUser(), problem, accuracy, grade, room.getPlayerCount()));
+
             if (preAccuracy == roomMember.getAccuracy()) {
                 tie++;
             } else {

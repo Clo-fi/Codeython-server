@@ -26,7 +26,13 @@ public class RoomMember {
     private boolean isOwner;
 
     @Column(name = "accuracy")
-    private Integer accuracy;
+    private int accuracy;
+
+    @Column(name = "grade")
+    private int grade;
+
+    @Column(name = "gain_exp")
+    private int gainExp;
 
     public RoomMember(Room room, Member user, boolean isOwner) {
         this.room = room;
@@ -42,7 +48,18 @@ public class RoomMember {
         this.accuracy = Math.max(this.accuracy, accuracy);
     }
 
-    public void accuracyReset() {
+    public void resetGameStatus() {
         this.accuracy = 0;
+        this.grade = 0;
+        this.gainExp = 0;
+    }
+
+    public boolean isAlreadyCorrected() {
+        return this.accuracy == 100;
+    }
+
+    public void updateGradeAndGainExp(int grade, int gainExp) {
+        this.grade = grade;
+        this.gainExp = gainExp;
     }
 }

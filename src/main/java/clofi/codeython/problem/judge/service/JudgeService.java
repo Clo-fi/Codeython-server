@@ -81,18 +81,24 @@ public class JudgeService {
 
             Room room = roomRepository.findById(submitRequest.roomId()).orElseThrow(() -> new IllegalArgumentException("없는 방 번호입니다."));
             RoomMember roomMember = roomMemberRepository.findByRoomAndUser(room, member).orElseThrow(() -> new IllegalArgumentException("사용자가 해당 방에 없습니다."));
-            List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+
+            if (roomMember.isAlreadyCorrected()) {
+                return new SubmitResponse(accuracy, roomMember.getGrade(), roomMember.getGainExp());
+            }
+
             roomMember.updateAccuracy(accuracy);
 
             if (accuracy == 100) {
-                int grade = (int) roomMembers.stream().filter(rm -> rm.getAccuracy() == 100).count();
+                room.increaseCorrectPlayerCount();
+                int grade = room.getCorrectPlayerCount();
                 int gainExp = (int) (accuracy * room.getPlayerCount() * (0.1 - (grade - 1) * 0.02));
+                roomMember.updateGradeAndGainExp(grade, gainExp);
 
                 if (grade == room.getPlayerCount()) {
                     room.gameEnd();
                     simpMessagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), new DataResponse<>("게임이 종료되었습니다.", GAME_END));
                 }
-                roomMember.getUser().gainExp(gainExp);
+                roomMember.getUser().increaseExp(gainExp);
                 recordRepository.save(Record.of(member, problem, accuracy, grade, room.getPlayerCount()));
                 return new SubmitResponse(accuracy, grade, gainExp);
             }

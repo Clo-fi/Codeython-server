@@ -45,11 +45,14 @@ public class Room {
     @Column(name = "limit_member_cnt", nullable = false)
     private int limitMemberCnt;
 
-    @Column(name = "player_count")
-    private Integer playerCount;
+    @Column(name = "player_count", nullable = false)
+    private int playerCount;
 
     @Column(name = "is_play", nullable = false)
     private boolean isPlay;
+
+    @Column(name = "correct_player_count", nullable = false)
+    private int correctPlayerCount;
 
     public Room(String roomName, Problem problem, int limitMemberCnt, boolean isSecret, String password,
         boolean isSoloPlay, String inviteCode) {
@@ -60,22 +63,26 @@ public class Room {
         this.password = password;
         this.isSoloPlay = isSoloPlay;
         this.inviteCode = inviteCode;
+        this.playerCount = 0;
         this.isPlay = false;
+        this.correctPlayerCount = 0;
     }
 
     public void changeProblem(Problem problem) {
         this.problem = problem;
     }
 
-    public void updatePlayerCount(int playerCount) {
-        this.playerCount = playerCount;
-    }
-
     public void gameEnd() {
         this.isPlay = false;
     }
 
-    public void gameStart() {
+    public void gameStart(int playerCount) {
+        this.playerCount = playerCount;
         this.isPlay = true;
+        this.correctPlayerCount = 0;
+    }
+
+    public void increaseCorrectPlayerCount() {
+        this.correctPlayerCount += 1;
     }
 }
