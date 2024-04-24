@@ -40,7 +40,7 @@ public class MemberController {
     @PatchMapping("/api/users")
     public ResponseEntity<Long> update(
         @AuthenticationPrincipal CustomMemberDetails userDetails,
-        @RequestBody UpdateMemberRequest updateMemberRequest) {
+        @Valid @RequestBody UpdateMemberRequest updateMemberRequest) {
         String username = userDetails.getUsername();
         return ResponseEntity.status(HttpStatus.OK).body(memberService.update(username, updateMemberRequest));
     }
