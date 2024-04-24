@@ -220,7 +220,7 @@ public class RoomService {
             gameEndResponses.add(new GameEndResponse(roomMember.getUser().getUserNo(), roomMember.getUser().getNickname(), grade, gainExp));
             if (accuracy != 100) {
                 roomMember.getUser().gainExp(gainExp);
-                recordRepository.save(Record.of(roomMember.getUser(), problem, grade, accuracy, room.getPlayerCount()));
+                recordRepository.save(Record.of(roomMember.getUser(), problem, accuracy, grade, room.getPlayerCount()));
             }
             if (preAccuracy == roomMember.getAccuracy()) {
                 tie++;
