@@ -33,14 +33,6 @@ public class SocketService {
         return getSocketUserResponses(roomMemberList);
     }
 
-    private List<SocketUserResponse> getSocketUserResponses(List<RoomMember> roomMemberList) {
-        return roomMemberList.stream().map(m -> {
-            Member member = m.getUser();
-            Map<String, Integer> levelAndExp = calculateLevelAndExp(member);
-            return SocketUserResponse.of(member, levelAndExp.get("level"), levelAndExp.get("exp"), m.isOwner());
-        }).toList();
-    }
-
     public List<SocketUserResponse> leaveRoom(Long roomId, String nickName) {
         Room room = roomRepository.findById(roomId)
             .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
@@ -65,6 +57,14 @@ public class SocketService {
         roomMemberList.removeIf(m -> m.getUser().equals(member));
 
         return getSocketUserResponses(roomMemberList);
+    }
+
+    private List<SocketUserResponse> getSocketUserResponses(List<RoomMember> roomMemberList) {
+        return roomMemberList.stream().map(m -> {
+            Member member = m.getUser();
+            Map<String, Integer> levelAndExp = calculateLevelAndExp(member);
+            return SocketUserResponse.of(member, levelAndExp.get("level"), levelAndExp.get("exp"), m.isOwner());
+        }).toList();
     }
 
     private Map<String, Integer> calculateLevelAndExp(Member member) {
