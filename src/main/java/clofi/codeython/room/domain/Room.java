@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +29,6 @@ public class Room {
     private String roomName;
 
     @Column(name = "password", length = 4)
-    @Size(min = 4, max = 4, message = "비밀번호는 4자리입니다.")
     private String password;
 
     @Column(name = "is_secret")

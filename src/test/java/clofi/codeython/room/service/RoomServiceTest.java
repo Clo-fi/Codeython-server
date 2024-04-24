@@ -91,7 +91,7 @@ class RoomServiceTest {
         assertThatThrownBy(() ->
             roomService.createRoom(createRoomRequest))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("비밀번호는 숫자여야 합니다.");
+            .hasMessage("비밀번호는 4자리 숫자여야 합니다.");
     }
 
     @DisplayName("비밀번호가 4자리가 아닐경우 예외 발생")
@@ -122,7 +122,7 @@ class RoomServiceTest {
         assertThatThrownBy(() ->
             roomService.createRoom(createRoomRequest))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("비밀번호는 4자리여야 합니다.");
+            .hasMessage("비밀번호는 4자리 숫자여야 합니다.");
     }
 
     @DisplayName("인원 제한 수가 2,4,6이 아닐 경우 예외")
