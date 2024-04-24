@@ -1,26 +1,5 @@
 package clofi.codeython.problem.judge.service;
 
-import clofi.codeython.member.domain.Member;
-import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.problem.domain.LanguageType;
-import clofi.codeython.problem.domain.Problem;
-import clofi.codeython.problem.domain.Record;
-import clofi.codeython.problem.domain.Testcase;
-import clofi.codeython.problem.judge.domain.ResultCalculator;
-import clofi.codeython.problem.judge.domain.creator.ExecutionFileCreator;
-import clofi.codeython.problem.judge.dto.ExecutionRequest;
-import clofi.codeython.problem.judge.dto.ExecutionResponse;
-import clofi.codeython.problem.judge.dto.SubmitRequest;
-import clofi.codeython.problem.judge.dto.SubmitResponse;
-import clofi.codeython.problem.repository.ProblemRepository;
-import clofi.codeython.problem.repository.RecordRepository;
-import clofi.codeython.problem.repository.TestcaseRepository;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,6 +7,28 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import clofi.codeython.member.domain.Member;
+import clofi.codeython.member.repository.MemberRepository;
+import clofi.codeython.problem.core.domain.LanguageType;
+import clofi.codeython.problem.core.domain.Problem;
+import clofi.codeython.problem.core.domain.Record;
+import clofi.codeython.problem.core.domain.Testcase;
+import clofi.codeython.problem.core.repository.ProblemRepository;
+import clofi.codeython.problem.core.repository.RecordRepository;
+import clofi.codeython.problem.core.repository.TestcaseRepository;
+import clofi.codeython.problem.judge.domain.ResultCalculator;
+import clofi.codeython.problem.judge.domain.creator.ExecutionFileCreator;
+import clofi.codeython.problem.judge.dto.request.ExecutionRequest;
+import clofi.codeython.problem.judge.dto.request.SubmitRequest;
+import clofi.codeython.problem.judge.dto.response.ExecutionResponse;
+import clofi.codeython.problem.judge.dto.response.SubmitResponse;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
@@ -45,13 +46,13 @@ public class JudgeService {
     public SubmitResponse submit(SubmitRequest submitRequest, Long problemNo, Member tokenMember) {
         Member member = memberRepository.findByUsername(tokenMember.getUsername());
         Problem problem = problemRepository.findById(problemNo)
-                .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
+            .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
 
         String route = UUID.randomUUID() + "/";
         createFolder(route);
         try {
             ExecutionFileCreator executionFileCreator = executionFileCreatorMap
-                    .get(LanguageType.getCreatorName(submitRequest.language()));
+                .get(LanguageType.getCreatorName(submitRequest.language()));
 
             executionFileCreator.create(problem.getType(), submitRequest.code(), route);
 
@@ -60,8 +61,8 @@ public class JudgeService {
             int accuracy = resultCalculator.judge(route, submitRequest.language(), testcases);
             if (submitRequest.roomId() == null) {
                 recordRepository.save(
-                        new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
-                                accuracy, null, null));
+                    new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
+                        accuracy, null, null));
 
             }
             return new SubmitResponse(accuracy, null, null);
@@ -88,13 +89,13 @@ public class JudgeService {
 
     public List<ExecutionResponse> execution(ExecutionRequest executionRequest, long problemNo) {
         Problem problem = problemRepository.findById(problemNo)
-                .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
+            .orElseThrow(() -> new IllegalArgumentException("없는 문제 번호입니다."));
 
         String route = UUID.randomUUID() + "/";
         createFolder(route);
         try {
             ExecutionFileCreator executionFileCreator = executionFileCreatorMap
-                    .get(LanguageType.getCreatorName(executionRequest.language()));
+                .get(LanguageType.getCreatorName(executionRequest.language()));
 
             executionFileCreator.create(problem.getType(), executionRequest.code(), route);
 

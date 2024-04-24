@@ -1,19 +1,21 @@
 package clofi.codeython.problem.judge.domain;
 
-import clofi.codeython.problem.domain.LanguageType;
-import clofi.codeython.problem.domain.Testcase;
-import clofi.codeython.problem.judge.domain.runner.CodeRunner;
-import clofi.codeython.problem.judge.dto.ExecutionResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import clofi.codeython.problem.core.domain.LanguageType;
+import clofi.codeython.problem.core.domain.Testcase;
+import clofi.codeython.problem.judge.domain.runner.CodeRunner;
+import clofi.codeython.problem.judge.dto.response.ExecutionResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor

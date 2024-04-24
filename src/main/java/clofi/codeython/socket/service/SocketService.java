@@ -13,7 +13,7 @@ import clofi.codeython.room.domain.Room;
 import clofi.codeython.room.domain.RoomMember;
 import clofi.codeython.room.repository.RoomMemberRepository;
 import clofi.codeython.room.repository.RoomRepository;
-import clofi.codeython.socket.controller.response.SocketUserResponse;
+import clofi.codeython.socket.dto.response.SocketUserResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service

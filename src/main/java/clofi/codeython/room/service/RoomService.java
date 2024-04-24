@@ -1,5 +1,7 @@
 package clofi.codeython.room.service;
 
+import static clofi.codeython.socket.dto.response.DataType.*;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,19 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.member.service.dto.CustomMemberDetails;
-import clofi.codeython.problem.domain.Problem;
-import clofi.codeython.problem.repository.ProblemRepository;
-import clofi.codeython.room.controller.response.AllRoomResponse;
-import clofi.codeython.room.controller.response.CreateRoomResponse;
-import clofi.codeython.room.controller.response.RoomResponse;
+import clofi.codeython.problem.core.domain.Problem;
+import clofi.codeython.problem.core.repository.ProblemRepository;
 import clofi.codeython.room.domain.Room;
 import clofi.codeython.room.domain.RoomMember;
-import clofi.codeython.room.domain.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.ChangeProblemRequest;
+import clofi.codeython.room.dto.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.WaitRoomRequest;
+import clofi.codeython.room.dto.response.AllRoomResponse;
+import clofi.codeython.room.dto.response.CreateRoomResponse;
+import clofi.codeython.room.dto.response.RoomResponse;
 import clofi.codeython.room.repository.RoomMemberRepository;
 import clofi.codeython.room.repository.RoomRepository;
-import clofi.codeython.room.service.request.WaitRoomRequest;
-import clofi.codeython.socket.controller.response.SocketUserResponse;
+import clofi.codeython.security.CustomMemberDetails;
+import clofi.codeython.socket.dto.response.ChangeProblemResponse;
+import clofi.codeython.socket.dto.response.DataResponse;
+import clofi.codeython.socket.dto.response.SocketUserResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -43,11 +48,11 @@ public class RoomService {
 
         List<RoomMember> roomMember = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
         if (room.isSecret()) {
-            if (!room.getPassword().equals(request.getPassword())) {
+            if (!room.getPassword().equals(request.password())) {
                 throw new IllegalArgumentException("비밀번호가 틀립니다");
             }
         } else {
-            if (request.getPassword() != null) {
+            if (request.password() != null) {
                 throw new IllegalArgumentException("공개방은 비밀번호가 필요 없습니다");
             }
         }
@@ -100,18 +105,6 @@ public class RoomService {
         return CreateRoomResponse.of(room);
     }
 
-    private void secretRoomPasswordValidate(String password) {
-        try {
-            Integer.valueOf(password);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("비밀번호는 숫자여야 합니다.");
-        }
-
-        if (password.length() != 4) {
-            throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
-        }
-    }
-
     public List<AllRoomResponse> getAllRoom() {
         List<Room> rooms = roomRepository.findAll();
 
@@ -122,6 +115,30 @@ public class RoomService {
                 return AllRoomResponse.of(room, playMemberCount);
             })
             .collect(Collectors.toList());
+    }
+
+    public Long changeProblem(Long roomId, ChangeProblemRequest changeProblemRequest) {
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
+        Problem problem = problemRepository.findByProblemNo(changeProblemRequest.problemId());
+        if (problem == null) {
+            throw new IllegalArgumentException("문제가 존재하지 않습니다.");
+        }
+        room.changeProblem(problem);
+        notifyChangeProblem(room, problem);
+        return room.getRoomNo();
+    }
+
+    private void secretRoomPasswordValidate(String password) {
+        try {
+            Integer.valueOf(password);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("비밀번호는 숫자여야 합니다.");
+        }
+
+        if (password.length() != 4) {
+            throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
+        }
     }
 
     private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
@@ -145,7 +162,20 @@ public class RoomService {
             exp = exp % 100;
         }
         RoomMember roomMemberUser = roomMemberRepository.findByUser(member);
-        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), level, exp, roomMemberUser.isOwner());
-        messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), socketUserResponse);
+        SocketUserResponse socketUserResponse = new SocketUserResponse(member.getNickname(), level, exp,
+            roomMemberUser.isOwner());
+        DataResponse<SocketUserResponse> socketUserResponseDataResponse = new DataResponse<>(socketUserResponse,
+            USER);
+        messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), socketUserResponseDataResponse);
+    }
+
+    private void notifyChangeProblem(Room room, Problem problem) {
+        ChangeProblemResponse changeProblemResponse = new ChangeProblemResponse(problem.getProblemNo(),
+            problem.getTitle(), problem.getLimitTime(),
+            problem.getDifficulty());
+        DataResponse<ChangeProblemResponse> changeProblemResponseDataResponse = new DataResponse<>(
+            changeProblemResponse, GAME_CHANGE);
+        messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), changeProblemResponseDataResponse);
+
     }
 }
