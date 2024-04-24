@@ -22,7 +22,7 @@ public class Record extends BaseEntity {
     @Column(name = "record_no", nullable = false)
     private Long recordNo;
 
-    @Column(name = "written_code", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "written_code", columnDefinition = "TEXT")
     private String writtenCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,7 +33,7 @@ public class Record extends BaseEntity {
     @JoinColumn(name = "problem_no", nullable = false)
     private Problem problem;
 
-    @Column(name = "language", nullable = false, length = 20)
+    @Column(name = "language", length = 20)
     private String language;
 
     @Column(name = "accuracy", nullable = false, columnDefinition = "int default 0")
@@ -54,5 +54,9 @@ public class Record extends BaseEntity {
         this.accuracy = accuracy;
         this.grade = grade;
         this.memberCnt = memberCnt;
+    }
+
+    public static Record of(Member member, Problem problem, int accuracy, int grade, int memberCnt) {
+        return new Record(null, member, problem, null, accuracy, grade, memberCnt);
     }
 }
