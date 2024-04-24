@@ -83,7 +83,8 @@ public class ProblemService {
             .stream()
             .map(bc -> {
                 Optional<Record> record = records.stream()
-                    .filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
+                    .filter(r -> r.getMemberCnt() == null)
+                    .filter(r -> bc.getLanguage().name().equals(r.getLanguage()))
                     .findAny();
                 return record.map(r -> new BaseCodeResponse(bc.getLanguage(), r.getWrittenCode()))
                     .orElseGet(() -> new BaseCodeResponse(bc.getLanguage(), bc.getBaseCode()));
