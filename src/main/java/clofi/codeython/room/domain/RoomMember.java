@@ -25,6 +25,9 @@ public class RoomMember {
     @Column(name = "is_owner")
     private boolean isOwner;
 
+    @Column(name = "accuracy")
+    private Integer accuracy;
+
     public RoomMember(Room room, Member user, boolean isOwner) {
         this.room = room;
         this.user = user;
@@ -33,5 +36,13 @@ public class RoomMember {
 
     public void updateOwner(boolean b) {
         this.isOwner = b;
+    }
+
+    public void updateAccuracy(int accuracy) {
+        this.accuracy = Math.max(this.accuracy, accuracy);
+    }
+
+    public void accuracyReset() {
+        this.accuracy = 0;
     }
 }

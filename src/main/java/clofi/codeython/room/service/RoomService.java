@@ -2,10 +2,14 @@ package clofi.codeython.room.service;
 
 import static clofi.codeython.socket.dto.response.DataType.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import clofi.codeython.problem.core.domain.Record;
+import clofi.codeython.problem.core.repository.RecordRepository;
+import clofi.codeython.socket.dto.response.GameEndResponse;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +44,7 @@ public class RoomService {
     private final RoomMemberRepository roomMemberRepository;
     private final MemberRepository memberRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final RecordRepository recordRepository;
 
     public RoomResponse joinRoomWithPassword(WaitRoomRequest request, Long roomId, CustomMemberDetails userDetails) {
         Member member = memberRepository.findByUsername(userDetails.getUsername());
@@ -109,6 +114,7 @@ public class RoomService {
         List<Room> rooms = roomRepository.findAll();
 
         return rooms.stream()
+            .filter(room -> !room.isPlay())
             .map(room -> {
                 List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
                 int playMemberCount = roomMembers.size();
@@ -177,5 +183,55 @@ public class RoomService {
             changeProblemResponse, GAME_CHANGE);
         messagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), changeProblemResponseDataResponse);
 
+    }
+
+    public void gameStart(Long roomId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("없는 방 번호입니다."));
+        room.gameStart();
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        roomMembers.forEach(RoomMember::accuracyReset);
+        room.updatePlayerCount(roomMembers.size());
+    }
+
+    public List<GameEndResponse> getGameResult(Long roomId) {
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new IllegalArgumentException("없는 방 번호입니다."));
+        if (!room.isPlay()) {
+            return List.of();
+        }
+        room.gameEnd();
+        roomRepository.saveAndFlush(room);
+
+        List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+        Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
+
+        Integer totalPlayerCount = room.getPlayerCount();
+        roomMembers.sort((rm1, rm2) -> rm2.getAccuracy() - rm1.getAccuracy());
+
+        int preAccuracy = -1;
+        int grade = 1;
+        int tie = 0;
+
+        List<GameEndResponse> gameEndResponses = new ArrayList<>();
+        for (RoomMember roomMember : roomMembers) {
+            Integer accuracy = roomMember.getAccuracy();
+            if (accuracy == null) {
+                accuracy = 0;
+            }
+            int gainExp = (int) (accuracy * totalPlayerCount * (0.1 - (grade - 1) * 0.02));
+            gameEndResponses.add(new GameEndResponse(roomMember.getUser().getUserNo(), roomMember.getUser().getNickname(), grade, gainExp));
+            if (accuracy != 100) {
+                roomMember.getUser().gainExp(gainExp);
+                recordRepository.save(Record.of(roomMember.getUser(), problem, accuracy, grade, room.getPlayerCount()));
+            }
+            if (preAccuracy == roomMember.getAccuracy()) {
+                tie++;
+            } else {
+                grade = grade + tie + 1;
+                tie = 0;
+            }
+            preAccuracy = accuracy;
+        }
+
+        return gameEndResponses;
     }
 }

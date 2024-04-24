@@ -8,7 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import clofi.codeython.room.domain.Room;
+import clofi.codeython.room.domain.RoomMember;
+import clofi.codeython.room.repository.RoomMemberRepository;
+import clofi.codeython.room.repository.RoomRepository;
+import clofi.codeython.socket.dto.response.DataResponse;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +36,8 @@ import clofi.codeython.problem.judge.dto.response.SubmitResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static clofi.codeython.socket.dto.response.DataType.GAME_END;
+
 @Slf4j
 @AllArgsConstructor
 @Transactional(readOnly = true)
@@ -41,6 +49,10 @@ public class JudgeService {
     private final TestcaseRepository testcaseRepository;
     private final RecordRepository recordRepository;
     private final MemberRepository memberRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final RoomMemberRepository roomMemberRepository;
+    private final RoomRepository roomRepository;
+
 
     @Transactional
     public SubmitResponse submit(SubmitRequest submitRequest, Long problemNo, Member tokenMember) {
@@ -59,11 +71,30 @@ public class JudgeService {
             List<Testcase> testcases = testcaseRepository.findAllByProblemProblemNo(problemNo);
 
             int accuracy = resultCalculator.judge(route, submitRequest.language(), testcases);
+
             if (submitRequest.roomId() == null) {
                 recordRepository.save(
                     new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
                         accuracy, null, null));
+                return new SubmitResponse(accuracy, null, null);
+            }
 
+            Room room = roomRepository.findById(submitRequest.roomId()).orElseThrow(() -> new IllegalArgumentException("없는 방 번호입니다."));
+            RoomMember roomMember = roomMemberRepository.findByRoomAndUser(room, member).orElseThrow(() -> new IllegalArgumentException("사용자가 해당 방에 없습니다."));
+            List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
+            roomMember.updateAccuracy(accuracy);
+
+            if (accuracy == 100) {
+                int grade = (int) roomMembers.stream().filter(rm -> rm.getAccuracy() == 100).count();
+                int gainExp = (int) (accuracy * room.getPlayerCount() * (0.1 - (grade - 1) * 0.02));
+
+                if (grade == room.getPlayerCount()) {
+                    room.gameEnd();
+                    simpMessagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), new DataResponse<>("게임이 종료되었습니다.", GAME_END));
+                }
+                roomMember.getUser().gainExp(gainExp);
+                recordRepository.save(Record.of(member, problem, accuracy, grade, room.getPlayerCount()));
+                return new SubmitResponse(accuracy, grade, gainExp);
             }
             return new SubmitResponse(accuracy, null, null);
         } finally {

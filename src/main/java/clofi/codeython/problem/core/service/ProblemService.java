@@ -62,8 +62,10 @@ public class ProblemService {
 
         return problems.stream().map(problem -> {
             List<Record> records = recordRepository.findAllByProblemAndMember(problem, member);
-            Optional<Record> highestAccuracy = records.stream().max(Comparator.comparingInt(Record::getAccuracy));
-            return highestAccuracy.map(record -> AllProblemResponse.of(problem, record.getAccuracy(), true))
+            Optional<Record> soloPlayHighestAccuracy = records.stream()
+                    .filter(record -> record.getMemberCnt() == null)
+                    .max(Comparator.comparingInt(Record::getAccuracy));
+            return soloPlayHighestAccuracy.map(record -> AllProblemResponse.of(problem, record.getAccuracy(), true))
                 .orElseGet(() -> AllProblemResponse.of(problem, 0, false));
         }).collect(Collectors.toList());
 
@@ -81,7 +83,8 @@ public class ProblemService {
             .stream()
             .map(bc -> {
                 Optional<Record> record = records.stream()
-                    .filter(r -> r.getLanguage().equals(bc.getLanguage().name()))
+                    .filter(r -> r.getMemberCnt() == null)
+                    .filter(r -> bc.getLanguage().name().equals(r.getLanguage()))
                     .findAny();
                 return record.map(r -> new BaseCodeResponse(bc.getLanguage(), r.getWrittenCode()))
                     .orElseGet(() -> new BaseCodeResponse(bc.getLanguage(), bc.getBaseCode()));
@@ -102,6 +105,7 @@ public class ProblemService {
     public List<RecordResponse> getRecord(String userName) {
         Member member = memberRepository.findByUsername(userName);
         return recordRepository.findAllByMemberOrderByUpdatedAtDesc(member).stream()
+            .filter(record -> record.getMemberCnt() == null)
             .map(record -> {
                 Problem problem = problemRepository.findByProblemNo(record.getProblem().getProblemNo());
                 return RecordResponse.of(record, problem.getTitle());

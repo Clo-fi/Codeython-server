@@ -1,6 +1,7 @@
 package clofi.codeython.common.config;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,9 +83,7 @@ public class SecurityConfig {
 
                     CorsConfiguration configuration = new CorsConfiguration();
 
-                    configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-                    configuration.setAllowedOrigins(
-                        Collections.singletonList("https://k1964add55381a.user-app.krampoline.com/"));
+                    configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://kc3837296ecb6a.user-app.krampoline.com/"));
                     configuration.setAllowedMethods(Collections.singletonList("*"));
                     configuration.setAllowCredentials(true);
                     configuration.setAllowedHeaders(Collections.singletonList("*"));
