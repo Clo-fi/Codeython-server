@@ -16,9 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import clofi.codeython.jwt.JWTFilter;
-import clofi.codeython.jwt.JWTUtil;
-import clofi.codeython.jwt.LoginFilter;
+import clofi.codeython.security.LoginFilter;
+import clofi.codeython.security.jwt.JWTFilter;
+import clofi.codeython.security.jwt.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 

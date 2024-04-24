@@ -1,15 +1,8 @@
 package clofi.codeython.member.service;
 
-import clofi.codeython.member.controller.response.MemberResponse;
-import clofi.codeython.member.controller.response.RankerResponse;
-import clofi.codeython.member.controller.response.RankingResponse;
-import clofi.codeython.member.domain.Member;
-import clofi.codeython.member.domain.request.CreateMemberRequest;
-import clofi.codeython.member.domain.request.UpdateMemberRequest;
-import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.member.service.dto.CustomMemberDetails;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,8 +10,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import clofi.codeython.member.domain.Member;
+import clofi.codeython.member.dto.request.CreateMemberRequest;
+import clofi.codeython.member.dto.request.UpdateMemberRequest;
+import clofi.codeython.member.dto.response.MemberResponse;
+import clofi.codeython.member.dto.response.RankerResponse;
+import clofi.codeython.member.dto.response.RankingResponse;
+import clofi.codeython.member.repository.MemberRepository;
+import clofi.codeython.security.CustomMemberDetails;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class MemberService implements UserDetailsService {
     public Long update(String userName, UpdateMemberRequest updateMemberRequest) {
         Member memberId = memberRepository.findByUsername(userName);
         Member member = memberRepository.findByUserNo(memberId.getUserNo())
-                .orElseThrow(() -> new EntityNotFoundException("일치하는 사용자가 없습니다."));
+            .orElseThrow(() -> new EntityNotFoundException("일치하는 사용자가 없습니다."));
         if (memberRepository.existsByNickname(updateMemberRequest.getNickname())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -76,7 +77,7 @@ public class MemberService implements UserDetailsService {
         for (int i = 0; i < top5Members.size(); i++) {
             Member currentMember = top5Members.get(i);
             rankerResponses.add(new RankerResponse(
-                    currentMember.getNickname(), i + 1, calculateUserLevel(currentMember.getExp())));
+                currentMember.getNickname(), i + 1, calculateUserLevel(currentMember.getExp())));
 
             if (currentMember.getUserNo().equals(member.getUserNo())) {
                 userRank = i + 1;
@@ -90,7 +91,7 @@ public class MemberService implements UserDetailsService {
         return RankingResponse.of(rankerResponses, userRank);
     }
 
-    private int calculateUserLevel(int exp){
+    private int calculateUserLevel(int exp) {
         int level = 1;
         if (exp > 100) {
             level = exp / 100 + 1;

@@ -1,6 +1,6 @@
 package clofi.codeython.room.domain;
 
-import clofi.codeython.problem.domain.Problem;
+import clofi.codeython.problem.core.domain.Problem;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

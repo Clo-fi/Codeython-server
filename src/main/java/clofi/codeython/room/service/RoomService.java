@@ -1,6 +1,6 @@
 package clofi.codeython.room.service;
 
-import static clofi.codeython.socket.controller.response.DataType.*;
+import static clofi.codeython.socket.dto.response.DataType.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,22 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.member.service.dto.CustomMemberDetails;
-import clofi.codeython.problem.domain.Problem;
-import clofi.codeython.problem.repository.ProblemRepository;
-import clofi.codeython.room.controller.response.AllRoomResponse;
-import clofi.codeython.room.controller.response.CreateRoomResponse;
-import clofi.codeython.room.controller.response.RoomResponse;
+import clofi.codeython.problem.core.domain.Problem;
+import clofi.codeython.problem.core.repository.ProblemRepository;
 import clofi.codeython.room.domain.Room;
 import clofi.codeython.room.domain.RoomMember;
-import clofi.codeython.room.domain.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.ChangeProblemRequest;
+import clofi.codeython.room.dto.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.WaitRoomRequest;
+import clofi.codeython.room.dto.response.AllRoomResponse;
+import clofi.codeython.room.dto.response.CreateRoomResponse;
+import clofi.codeython.room.dto.response.RoomResponse;
 import clofi.codeython.room.repository.RoomMemberRepository;
 import clofi.codeython.room.repository.RoomRepository;
-import clofi.codeython.room.service.request.ChangeProblemRequest;
-import clofi.codeython.room.service.request.WaitRoomRequest;
-import clofi.codeython.socket.controller.response.ChangeProblemResponse;
-import clofi.codeython.socket.controller.response.DataResponse;
-import clofi.codeython.socket.controller.response.SocketUserResponse;
+import clofi.codeython.security.CustomMemberDetails;
+import clofi.codeython.socket.dto.response.ChangeProblemResponse;
+import clofi.codeython.socket.dto.response.DataResponse;
+import clofi.codeython.socket.dto.response.SocketUserResponse;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -48,11 +48,11 @@ public class RoomService {
 
         List<RoomMember> roomMember = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
         if (room.isSecret()) {
-            if (!room.getPassword().equals(request.getPassword())) {
+            if (!room.getPassword().equals(request.password())) {
                 throw new IllegalArgumentException("비밀번호가 틀립니다");
             }
         } else {
-            if (request.getPassword() != null) {
+            if (request.password() != null) {
                 throw new IllegalArgumentException("공개방은 비밀번호가 필요 없습니다");
             }
         }

@@ -1,17 +1,9 @@
 package clofi.codeython.problem.judge.service;
 
-import clofi.codeython.member.domain.Member;
-import clofi.codeython.member.repository.MemberRepository;
-import clofi.codeython.problem.domain.Record;
-import clofi.codeython.problem.domain.*;
-import clofi.codeython.problem.judge.dto.ExecutionRequest;
-import clofi.codeython.problem.judge.dto.ExecutionResponse;
-import clofi.codeython.problem.judge.dto.SubmitRequest;
-import clofi.codeython.problem.judge.dto.SubmitResponse;
-import clofi.codeython.problem.repository.LanguageRepository;
-import clofi.codeython.problem.repository.ProblemRepository;
-import clofi.codeython.problem.repository.RecordRepository;
-import clofi.codeython.problem.repository.TestcaseRepository;
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.List;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,9 +11,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import clofi.codeython.member.domain.Member;
+import clofi.codeython.member.repository.MemberRepository;
+import clofi.codeython.problem.core.domain.Language;
+import clofi.codeython.problem.core.domain.LanguageType;
+import clofi.codeython.problem.core.domain.Problem;
+import clofi.codeython.problem.core.domain.Record;
+import clofi.codeython.problem.core.domain.Testcase;
+import clofi.codeython.problem.core.repository.LanguageRepository;
+import clofi.codeython.problem.core.repository.ProblemRepository;
+import clofi.codeython.problem.core.repository.RecordRepository;
+import clofi.codeython.problem.core.repository.TestcaseRepository;
+import clofi.codeython.problem.judge.dto.request.ExecutionRequest;
+import clofi.codeython.problem.judge.dto.request.SubmitRequest;
+import clofi.codeython.problem.judge.dto.response.ExecutionResponse;
+import clofi.codeython.problem.judge.dto.response.SubmitResponse;
 
 @SpringBootTest
 class JudgeServiceTest {
@@ -58,22 +62,22 @@ class JudgeServiceTest {
         // given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    return answer;
                 }
-                """, null);
+            }
+            """, null);
 
         // when
         SubmitResponse response = judgeService.submit(submitRequest, problem.getProblemNo(), member);
@@ -88,16 +92,16 @@ class JudgeServiceTest {
         // given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("javascript", """
-                function solution(N, values) {
-                  return values.map(v => v * 2)
-                }
-                """, null);
+            function solution(N, values) {
+              return values.map(v => v * 2)
+            }
+            """, null);
 
         // when
         SubmitResponse response = judgeService.submit(submitRequest, problem.getProblemNo(), member);
@@ -112,21 +116,21 @@ class JudgeServiceTest {
         // given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("go", """
-                function solution(N, values) {
-                  return values.map(v => v * 2)
-                }
-                """, null);
+            function solution(N, values) {
+              return values.map(v => v * 2)
+            }
+            """, null);
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member))
-                .withMessage("GO(은)는 지원하지 않는 언어 종류입니다.");
+            .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member))
+            .withMessage("GO(은)는 지원하지 않는 언어 종류입니다.");
     }
 
     @DisplayName("코드 채점 중 Exception이 발생하면 오류가 발생한다.")
@@ -135,27 +139,27 @@ class JudgeServiceTest {
         // given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        throw new IllegalArgumentException("예외 발생");
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    throw new IllegalArgumentException("예외 발생");
+                    return answer;
                 }
-                """, null);
+            }
+            """, null);
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member));
+            .isThrownBy(() -> judgeService.submit(submitRequest, problem.getProblemNo(), member));
     }
 
     @DisplayName("자바 코드 실행결과 및 정답 여부를 확인할 수 있다.")
@@ -163,22 +167,22 @@ class JudgeServiceTest {
     void javaCodeExecutionTest() {
         // given
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    return answer;
                 }
-                """);
+            }
+            """);
 
         // when
         List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
@@ -192,16 +196,16 @@ class JudgeServiceTest {
     void javascriptCodeExecutionTest() {
         // given
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("javascript", """
-                function solution(N, values) {
-                  return values.map(v => v * 2)
-                }
-                """);
+            function solution(N, values) {
+              return values.map(v => v * 2)
+            }
+            """);
 
         // when
         List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
@@ -215,23 +219,23 @@ class JudgeServiceTest {
     void incorrectOutputCodeTest() {
         // given
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        System.out.println("Test message");
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    System.out.println("Test message");
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    return answer;
                 }
-                """);
+            }
+            """);
 
         // when
         List<ExecutionResponse> actual = judgeService.execution(executionRequest, problem.getProblemNo());
@@ -245,27 +249,27 @@ class JudgeServiceTest {
     void exceptionCodeExecutionTest() {
         // given
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        throw new IllegalArgumentException("예외 발생");
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    throw new IllegalArgumentException("예외 발생");
+                    return answer;
                 }
-                """);
+            }
+            """);
 
         // when & then
         Assertions.assertThatIllegalArgumentException()
-                .isThrownBy(() -> judgeService.execution(executionRequest, problem.getProblemNo()));
+            .isThrownBy(() -> judgeService.execution(executionRequest, problem.getProblemNo()));
     }
 
     @DisplayName("description이 없는 테스트 케이스는 실행하지 않는다.")
@@ -273,22 +277,22 @@ class JudgeServiceTest {
     void emptyDescriptionTestcaseTest() {
         // given
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", null));
+            "[2,4,6]", null));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         ExecutionRequest executionRequest = new ExecutionRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    return answer;
                 }
-                """);
+            }
+            """);
 
         // when
         List<ExecutionResponse> execution = judgeService.execution(executionRequest, problem.getProblemNo());
@@ -303,22 +307,22 @@ class JudgeServiceTest {
         // given
         Member member = memberRepository.save(new Member("username", "password", "nickname"));
         Problem problem = problemRepository.save(new Problem(
-                "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
+            "title", "content", List.of("제한 사항"), 1, 1, List.of("int", "int[]")
         ));
         testcaseRepository.save(new Testcase(problem, List.of("3", "[1, 2, 3]"),
-                "[2,4,6]", "description"));
+            "[2,4,6]", "description"));
         languageRepository.save(new Language(problem, LanguageType.JAVA, "base code..."));
         SubmitRequest submitRequest = new SubmitRequest("java", """
-                class Solution {
-                    public int[] solution(int N, int[] values) {
-                        int[] answer = new int[values.length];
-                        for (int i = 0; i < N; i++) {
-                            answer[i] = values[i] * 2;
-                        }
-                        return answer;
+            class Solution {
+                public int[] solution(int N, int[] values) {
+                    int[] answer = new int[values.length];
+                    for (int i = 0; i < N; i++) {
+                        answer[i] = values[i] * 2;
                     }
+                    return answer;
                 }
-                """, null);
+            }
+            """, null);
 
         // when
         judgeService.submit(submitRequest, problem.getProblemNo(), member);

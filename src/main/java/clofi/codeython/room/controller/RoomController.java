@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import clofi.codeython.member.service.dto.CustomMemberDetails;
-import clofi.codeython.room.controller.response.AllRoomResponse;
-import clofi.codeython.room.controller.response.CreateRoomResponse;
-import clofi.codeython.room.controller.response.RoomResponse;
-import clofi.codeython.room.domain.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.ChangeProblemRequest;
+import clofi.codeython.room.dto.request.CreateRoomRequest;
+import clofi.codeython.room.dto.request.WaitRoomRequest;
+import clofi.codeython.room.dto.response.AllRoomResponse;
+import clofi.codeython.room.dto.response.CreateRoomResponse;
+import clofi.codeython.room.dto.response.RoomResponse;
 import clofi.codeython.room.service.RoomService;
-import clofi.codeython.room.service.request.ChangeProblemRequest;
-import clofi.codeython.room.service.request.WaitRoomRequest;
+import clofi.codeython.security.CustomMemberDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
