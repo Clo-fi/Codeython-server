@@ -114,6 +114,7 @@ public class RoomService {
         List<Room> rooms = roomRepository.findAll();
 
         return rooms.stream()
+            .filter(room -> !room.isPlay())
             .map(room -> {
                 List<RoomMember> roomMembers = roomMemberRepository.findAllByRoom(room);
                 int playMemberCount = roomMembers.size();

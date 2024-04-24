@@ -89,6 +89,7 @@ public class JudgeService {
                 int gainExp = (int) (accuracy * room.getPlayerCount() * (0.1 - (grade - 1) * 0.02));
 
                 if (grade == room.getPlayerCount()) {
+                    room.gameEnd();
                     simpMessagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), new DataResponse<>("게임이 종료되었습니다.", GAME_END));
                 }
                 roomMember.getUser().gainExp(gainExp);
