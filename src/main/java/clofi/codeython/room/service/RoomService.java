@@ -228,7 +228,7 @@ public class RoomService {
                 grade = grade + tie + 1;
                 tie = 0;
             }
-            preAccuracy = gainExp;
+            preAccuracy = accuracy;
         }
 
         return gameEndResponses;
