@@ -1,5 +1,12 @@
 package clofi.codeython.socket.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import clofi.codeython.member.domain.Member;
 import clofi.codeython.member.repository.MemberRepository;
 import clofi.codeython.room.domain.Room;
@@ -8,12 +15,6 @@ import clofi.codeython.room.repository.RoomMemberRepository;
 import clofi.codeython.room.repository.RoomRepository;
 import clofi.codeython.socket.controller.response.SocketUserResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @Transactional
@@ -26,23 +27,15 @@ public class SocketService {
 
     public List<SocketUserResponse> joinRoom(Long roomId) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
         List<RoomMember> roomMemberList = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
 
         return getSocketUserResponses(roomMemberList);
     }
 
-    private List<SocketUserResponse> getSocketUserResponses(List<RoomMember> roomMemberList) {
-        return roomMemberList.stream().map(m -> {
-            Member member = m.getUser();
-            Map<String, Integer> levelAndExp = calculateLevelAndExp(member);
-            return SocketUserResponse.of(member, levelAndExp.get("level"), levelAndExp.get("exp"), m.isOwner());
-        }).toList();
-    }
-
     public List<SocketUserResponse> leaveRoom(Long roomId, String nickName) {
         Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
+            .orElseThrow(() -> new IllegalArgumentException("방이 존재하지 않습니다."));
         Member member = memberRepository.findByNickname(nickName);
         RoomMember roomMemberUser = roomMemberRepository.findByUser(member);
         List<RoomMember> roomMemberList = roomMemberRepository.findAllByRoomRoomNo(room.getRoomNo());
@@ -51,7 +44,7 @@ public class SocketService {
             roomMemberRepository.deleteByRoomAndUser(room, member);
             if (roomMemberList.size() > 1) {
                 RoomMember newOwner =
-                        roomMemberList.get(0).getUser().equals(member) ? roomMemberList.get(1) : roomMemberList.get(0);
+                    roomMemberList.get(0).getUser().equals(member) ? roomMemberList.get(1) : roomMemberList.get(0);
                 newOwner.updateOwner(true);
                 roomMemberRepository.save(newOwner);
             } else {
@@ -64,6 +57,14 @@ public class SocketService {
         roomMemberList.removeIf(m -> m.getUser().equals(member));
 
         return getSocketUserResponses(roomMemberList);
+    }
+
+    private List<SocketUserResponse> getSocketUserResponses(List<RoomMember> roomMemberList) {
+        return roomMemberList.stream().map(m -> {
+            Member member = m.getUser();
+            Map<String, Integer> levelAndExp = calculateLevelAndExp(member);
+            return SocketUserResponse.of(member, levelAndExp.get("level"), levelAndExp.get("exp"), m.isOwner());
+        }).toList();
     }
 
     private Map<String, Integer> calculateLevelAndExp(Member member) {
