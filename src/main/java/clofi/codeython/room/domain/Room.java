@@ -1,7 +1,14 @@
 package clofi.codeython.room.domain;
 
 import clofi.codeython.problem.domain.Problem;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +46,7 @@ public class Room {
     private int limitMemberCnt;
 
     public Room(String roomName, Problem problem, int limitMemberCnt, boolean isSecret, String password,
-                boolean isSoloPlay, String inviteCode) {
+        boolean isSoloPlay, String inviteCode) {
         this.roomName = roomName;
         this.problem = problem;
         this.limitMemberCnt = limitMemberCnt;
@@ -47,5 +54,9 @@ public class Room {
         this.password = password;
         this.isSoloPlay = isSoloPlay;
         this.inviteCode = inviteCode;
+    }
+
+    public void changeProblem(Problem problem) {
+        this.problem = problem;
     }
 }

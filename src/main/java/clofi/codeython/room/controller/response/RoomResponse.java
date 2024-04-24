@@ -10,6 +10,7 @@ public record RoomResponse(
     Integer limitTime,
     Integer difficulty,
     String roomName,
+    Integer limitMemberCnt,
     String inviteCode,
     Boolean isSoloPlay
 ) {
@@ -21,6 +22,7 @@ public record RoomResponse(
             problem.getLimitTime(),
             problem.getDifficulty(),
             room.getRoomName(),
+            room.getLimitMemberCnt(),
             room.getInviteCode(),
             room.isSoloPlay()
         );
