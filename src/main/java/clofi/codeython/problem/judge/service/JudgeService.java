@@ -91,7 +91,7 @@ public class JudgeService {
                 if (grade == room.getPlayerCount()) {
                     simpMessagingTemplate.convertAndSend("/sub/room/" + room.getRoomNo(), new DataResponse<>("게임이 종료되었습니다.", GAME_END));
                 }
-
+                roomMember.getUser().gainExp(gainExp);
                 recordRepository.save(Record.of(member, problem, grade, accuracy, room.getPlayerCount()));
                 return new SubmitResponse(accuracy, grade, gainExp);
             }

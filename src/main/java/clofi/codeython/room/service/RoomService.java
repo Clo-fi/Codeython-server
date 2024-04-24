@@ -219,6 +219,7 @@ public class RoomService {
             int gainExp = (int) (accuracy * totalPlayerCount * (0.1 - (grade - 1) * 0.02));
             gameEndResponses.add(new GameEndResponse(roomMember.getUser().getUserNo(), roomMember.getUser().getNickname(), grade, gainExp));
             if (accuracy != 100) {
+                roomMember.getUser().gainExp(gainExp);
                 recordRepository.save(Record.of(roomMember.getUser(), problem, grade, accuracy, room.getPlayerCount()));
             }
             if (preAccuracy == roomMember.getAccuracy()) {
