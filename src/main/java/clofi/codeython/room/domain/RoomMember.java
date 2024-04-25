@@ -62,4 +62,9 @@ public class RoomMember {
         this.grade = grade;
         this.gainExp = gainExp;
     }
+
+    public void updateRoomAndIsOwner(Room room, Boolean isOwner) {
+        this.room = room;
+        this.isOwner = isOwner;
+    }
 }
