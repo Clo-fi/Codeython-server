@@ -62,6 +62,6 @@ public class Record extends BaseEntity {
 
     public void update(String code, int accuracy) {
         this.writtenCode = code;
-        this.accuracy = accuracy;
+        this.accuracy = Math.max(this.accuracy, accuracy);
     }
 }
