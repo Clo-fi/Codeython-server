@@ -54,7 +54,8 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findByUsername(userName);
         Integer exp = member.getExp();
         int level = calculateUserLevel(exp);
-        return MemberResponse.of(member, level, exp);
+        int remainExp = calculateRemainExp(exp);
+        return MemberResponse.of(member, level, remainExp);
     }
 
     @Override
@@ -92,12 +93,11 @@ public class MemberService implements UserDetailsService {
     }
 
     private int calculateUserLevel(int exp) {
-        int level = 1;
-        if (exp > 100) {
-            level = exp / 100 + 1;
-            exp = exp % 100;
-        }
-        return level;
+        return exp / 100 + 1;
+    }
+
+    private int calculateRemainExp(int exp) {
+        return exp % 100;
     }
 
 }
