@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import clofi.codeython.room.domain.Room;
@@ -73,8 +75,17 @@ public class JudgeService {
             int accuracy = resultCalculator.judge(route, submitRequest.language(), testcases);
 
             if (submitRequest.roomId() == null) {
-                recordRepository.save(
-                    new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
+                Optional<Record> recentRecord = recordRepository.findFirstByMemberAndProblemAndLanguageOrderByUpdatedAtDesc(member, problem, submitRequest.language());
+                if (recentRecord.isPresent()) {
+                    Record record = recentRecord.get();
+                    if (record.getUpdatedAt().toLocalDate().isEqual(LocalDateTime.now().toLocalDate())) {
+                        record.update(submitRequest.code(), accuracy);
+                        recordRepository.save(record);
+                        return new SubmitResponse(accuracy, null, null);
+                    }
+                }
+
+                recordRepository.save(new Record(submitRequest.code(), member, problem, submitRequest.language().toUpperCase(),
                         accuracy, null, null));
                 return new SubmitResponse(accuracy, null, null);
             }
