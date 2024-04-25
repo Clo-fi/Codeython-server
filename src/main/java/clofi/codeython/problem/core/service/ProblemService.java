@@ -105,7 +105,6 @@ public class ProblemService {
     public List<RecordResponse> getRecord(String userName) {
         Member member = memberRepository.findByUsername(userName);
         return recordRepository.findAllByMemberOrderByUpdatedAtDesc(member).stream()
-            .filter(record -> record.getMemberCnt() == null)
             .map(record -> {
                 Problem problem = problemRepository.findByProblemNo(record.getProblem().getProblemNo());
                 return RecordResponse.of(record, problem.getTitle());

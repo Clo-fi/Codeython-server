@@ -59,4 +59,9 @@ public class Record extends BaseEntity {
     public static Record of(Member member, Problem problem, int accuracy, int grade, int memberCnt) {
         return new Record(null, member, problem, null, accuracy, grade, memberCnt);
     }
+
+    public void update(String code, int accuracy) {
+        this.writtenCode = code;
+        this.accuracy = Math.max(this.accuracy, accuracy);
+    }
 }
