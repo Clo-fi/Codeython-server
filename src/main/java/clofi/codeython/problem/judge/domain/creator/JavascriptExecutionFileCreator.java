@@ -19,11 +19,11 @@ public class JavascriptExecutionFileCreator implements ExecutionFileCreator {
     private String getExecutionCode(int inputTypeSize, String code) {
         StringBuilder sb = new StringBuilder(code);
 
-        sb.append("console.log((solution(");
+        sb.append("console.log(JSON.stringify((solution(");
         for (int i = 0; i < inputTypeSize; i++) {
             sb.append(String.format("JSON.parse(process.argv[%d]),", i + 2));
         }
-        sb.append(")));");
+        sb.append("))));");
 
         return sb.toString();
     }
