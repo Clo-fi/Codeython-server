@@ -144,15 +144,15 @@ public class RoomService {
     }
 
     private RoomResponse processRoomJoin(Room room, Member member, Boolean isOwner) {
-
         Problem problem = problemRepository.findByProblemNo(room.getProblem().getProblemNo());
-        RoomMember roomMember = new RoomMember(room, member, isOwner);
-        if (roomMemberRepository.existsRoomMemberByRoomAndUser(room, member)) {
-            throw new IllegalArgumentException("이미 참여한 방 입니다.");
+        RoomMember roomMember = roomMemberRepository.findByUser(member);
+        if (roomMember != null) {
+            roomMember.updateRoomAndIsOwner(room, isOwner);
+        } else {
+            roomMemberRepository.save(new RoomMember(room, member, isOwner));
         }
-        roomMemberRepository.save(roomMember);
-        notifyRoomParticipants(room, member);
 
+        notifyRoomParticipants(room, member);
         return RoomResponse.of(room, problem);
     }
 
