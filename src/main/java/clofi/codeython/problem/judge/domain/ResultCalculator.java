@@ -56,7 +56,7 @@ public class ResultCalculator {
         List<ExecutionResponse> list = new ArrayList<>();
         for (Testcase testcase : testcases) {
             if (testcase.getDescription() == null) {
-                break;
+                continue;
             }
             String result = codeRunner.run(route, testcase.getInput());
 

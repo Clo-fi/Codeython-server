@@ -93,6 +93,7 @@ public class ProblemService {
 
         List<TestcaseResponse> testcases = testcaseRepository.findByProblem(problem)
             .stream()
+            .filter(tc -> tc.getDescription() != null)
             .map(tc -> new TestcaseResponse(tc.getInput(), tc.getOutput(), tc.getDescription()))
             .collect(Collectors.toList());
 
