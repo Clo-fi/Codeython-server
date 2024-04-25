@@ -5,6 +5,7 @@ import static clofi.codeython.socket.dto.response.DataType.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import clofi.codeython.problem.core.domain.Record;
@@ -38,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class RoomService {
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^\\d{4}$");
 
     private final RoomRepository roomRepository;
     private final ProblemRepository problemRepository;
@@ -136,14 +138,8 @@ public class RoomService {
     }
 
     private void secretRoomPasswordValidate(String password) {
-        try {
-            Integer.valueOf(password);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("비밀번호는 숫자여야 합니다.");
-        }
-
-        if (password.length() != 4) {
-            throw new IllegalArgumentException("비밀번호는 4자리여야 합니다.");
+        if (!PASSWORD_PATTERN.matcher(password).find()) {
+            throw new IllegalArgumentException("비밀번호는 4자리 숫자여야 합니다.");
         }
     }
 
