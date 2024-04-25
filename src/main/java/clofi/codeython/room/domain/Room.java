@@ -25,7 +25,7 @@ public class Room {
     @JoinColumn(name = "problem_no", nullable = false)
     private Problem problem;
 
-    @Column(name = "room_name", length = 50)
+    @Column(name = "room_name", unique = true, length = 50)
     private String roomName;
 
     @Column(name = "password", length = 4)
@@ -37,7 +37,7 @@ public class Room {
     @Column(name = "is_solo_play")
     private boolean isSoloPlay;
 
-    @Column(name = "invite_code", nullable = false, length = 50)
+    @Column(name = "invite_code", unique = true, nullable = false, length = 50)
     private String inviteCode;
 
     @Column(name = "limit_member_cnt", nullable = false)

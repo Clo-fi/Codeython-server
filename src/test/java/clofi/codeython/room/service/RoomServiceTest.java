@@ -169,7 +169,7 @@ class RoomServiceTest {
             List.of("String[][]", "int", "String")
         );
         Problem problem2 = new Problem(
-            "where is koreanCow",
+            "where is koreanCow another",
             "koreanCow is delicious",
             List.of("Never eat dog"),
             60,

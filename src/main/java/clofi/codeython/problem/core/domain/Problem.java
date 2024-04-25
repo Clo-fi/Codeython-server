@@ -27,7 +27,7 @@ public class Problem extends BaseEntity {
     @Column(name = "problem_no", nullable = false)
     private Long problemNo;
 
-    @Column(name = "title", nullable = false, length = 50)
+    @Column(name = "title", unique = true, nullable = false, length = 50)
     private String title;
 
     @Column(name = "content", nullable = false, columnDefinition = "TEXT")
