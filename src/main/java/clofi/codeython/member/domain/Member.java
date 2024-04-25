@@ -58,7 +58,7 @@ public class Member extends BaseEntity {
         this.nickname = nickname;
     }
 
-    public void gainExp(int gainExp) {
+    public void increaseExp(int gainExp) {
         this.exp += gainExp;
     }
 }
